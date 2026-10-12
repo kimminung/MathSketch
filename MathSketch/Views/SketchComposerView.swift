@@ -9,6 +9,7 @@ struct SketchComposerView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var showSaveDialog = false
     @State private var saveTitle = ""
+    @State private var showClearAllConfirm = false
 
     var body: some View {
         NavigationStack {
@@ -34,7 +35,24 @@ struct SketchComposerView: View {
             }
             .navigationTitle("MathSketch")
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItemGroup(placement: .topBarLeading) {
+                    Button {
+                        model.undo()
+                    } label: {
+                        Image(systemName: "arrow.uturn.backward")
+                    }
+                    .disabled(!model.canUndo)
+                    .accessibilityLabel(Text("실행 취소"))
+
+                    Button {
+                        model.redo()
+                    } label: {
+                        Image(systemName: "arrow.uturn.forward")
+                    }
+                    .disabled(!model.canRedo)
+                    .accessibilityLabel(Text("다시 실행"))
+                }
+                ToolbarItemGroup(placement: .topBarTrailing) {
                     Button {
                         saveTitle = model.paletteCaption.isEmpty ? "제목 없음" : model.paletteCaption
                         showSaveDialog = true
@@ -43,12 +61,34 @@ struct SketchComposerView: View {
                     }
                     .disabled(model.elements.isEmpty)
                     .accessibilityLabel(Text("갤러리에 저장"))
+
+                    Button(role: .destructive) {
+                        model.deleteSelected()
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                    .disabled(model.selectedElementID == nil)
+                    .accessibilityLabel(Text("선택한 요소 하나 삭제"))
+
+                    Button(role: .destructive) {
+                        showClearAllConfirm = true
+                    } label: {
+                        Image(systemName: "trash.fill")
+                    }
+                    .disabled(model.elements.isEmpty)
+                    .accessibilityLabel(Text("모두 지우기"))
                 }
             }
             .alert("갤러리에 저장", isPresented: $showSaveDialog) {
                 TextField("제목", text: $saveTitle)
                 Button("취소", role: .cancel) {}
                 Button("저장") { saveToGallery() }
+            }
+            .alert("모두 지우기", isPresented: $showClearAllConfirm) {
+                Button("취소", role: .cancel) {}
+                Button("지우기", role: .destructive) { model.clearAll() }
+            } message: {
+                Text("캔버스의 모든 요소를 삭제합니다. 실행 취소로 되돌릴 수 있습니다.")
             }
         }
     }

@@ -33,9 +33,11 @@ struct FormulaBarView: View {
                 }
                 .accessibilityLabel(Text("수식으로 그리기"))
             }
+            // No lineLimit here on purpose — the whole equation must always be visible, never
+            // truncated with an ellipsis, no matter how long the piecewise shapes make it.
             Text(model.artisticNarrative.isEmpty ? "캔버스가 비어 있습니다" : model.artisticNarrative)
-                .font(.system(.body, design: .serif))
-                .lineLimit(8)
+                .font(.system(.footnote, design: .serif))
+                .fixedSize(horizontal: false, vertical: true)
                 .textSelection(.enabled)
 
             if !model.formulaText.isEmpty {

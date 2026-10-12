@@ -390,34 +390,64 @@ nonisolated enum ShapeKind: String, CaseIterable, Identifiable, Codable, Sendabl
         }
     }
 
-    /// Short human-readable notation substituting the resolved parameter values.
+    /// Full, unabbreviated parametric (or implicit) equation with every value substituted in —
+    /// deliberately never a shorthand description ("정5각형, r=50") even for the piecewise
+    /// shapes, so the formula panel always reads as a complete equation, never a summary.
     func formulaExpression(params rawParams: [String: Double]) -> String {
         let p = resolvedParameters(rawParams)
         func n(_ key: String) -> String { NumberText.format(p[key] ?? 0) }
+        func sweep(_ turns: String) -> String { NumberText.format((p[turns] ?? 1) * 2 * .pi) }
         switch self {
-        case .point: return "𝑃 = (\(n("x")), \(n("y")))"
-        case .line: return "𝑦 = \(n("m"))·𝑥 + \(n("b"))"
-        case .plane: return "{(𝑥,𝑦) : |𝑥| ≤ \(n("w"))/2, |𝑦| ≤ \(n("h"))/2}"
-        case .segment: return "(\(n("x1")),\(n("y1"))) → (\(n("x2")),\(n("y2")))"
-        case .ray: return "𝑃₀=(\(n("x0")),\(n("y0"))), θ=\(n("angle"))°, 𝐿=\(n("length"))"
-        case .polyline: return "(\(n("x1")),\(n("y1")))→(\(n("x2")),\(n("y2")))→(\(n("x3")),\(n("y3")))"
-        case .arc: return "𝑥(𝑡)=\(n("r"))·cos 𝑡, 𝑦(𝑡)=\(n("r"))·sin 𝑡, 𝑡∈[\(n("startAngle"))°,\(n("endAngle"))°]"
-        case .quadBezier: return "𝐵(𝑡) = (1-𝑡)²𝑃₀ + 2(1-𝑡)𝑡·𝐶 + 𝑡²𝑃₁, 𝐶=(\(n("cx")),\(n("cy")))"
-        case .cubicBezier: return "𝐵(𝑡) = 3차 베지어, 𝐶₁=(\(n("c1x")),\(n("c1y"))), 𝐶₂=(\(n("c2x")),\(n("c2y")))"
-        case .circle: return "𝑥(𝑡)=\(n("r"))·cos 𝑡, 𝑦(𝑡)=\(n("r"))·sin 𝑡"
-        case .ellipse: return "𝑥(𝑡)=\(n("rx"))·cos 𝑡, 𝑦(𝑡)=\(n("ry"))·sin 𝑡"
-        case .polygon: return "정\(Int(p["sides"] ?? 5))각형, 𝑟=\(n("r"))"
-        case .star: return "별 \(Int(p["points"] ?? 5))개 꼭짓점, 𝑟ₒ=\(n("rOuter")), 𝑟ᵢ=\(n("rInner"))"
-        case .sine: return "𝑦 = \(n("amplitude"))·sin(\(n("frequency"))·𝑥 + \(n("phase")))"
-        case .cosine: return "𝑦 = \(n("amplitude"))·cos(\(n("frequency"))·𝑥 + \(n("phase")))"
-        case .lissajous: return "𝑥=\(n("scale"))·sin(\(n("a"))𝑡+\(n("delta"))), 𝑦=\(n("scale"))·sin(\(n("b"))𝑡)"
-        case .spiral: return "𝑟 = \(n("a")) + \(n("b"))θ"
-        case .logSpiral: return "𝑟 = \(n("a"))·𝑒^(\(n("b"))θ)"
-        case .rose: return "𝑟 = \(n("r"))·cos(\(Int(p["k"] ?? 4))θ)"
-        case .cardioid: return "𝑟 = \(n("a"))(1 - cos θ)"
-        case .astroid: return "𝑥=\(n("a"))cos³θ, 𝑦=\(n("a"))sin³θ"
-        case .epicycloid: return "에피사이클로이드, 𝑅=\(n("R")), 𝑟=\(n("r"))"
-        case .hypocycloid: return "하이포사이클로이드, 𝑅=\(n("R")), 𝑟=\(n("r"))"
+        case .point:
+            return "𝑃 = (\(n("x")), \(n("y")))"
+        case .line:
+            return "𝑦 = \(n("m"))·𝑥 + \(n("b"))"
+        case .plane:
+            return "{(𝑥,𝑦) : |𝑥| ≤ \(n("w"))/2, |𝑦| ≤ \(n("h"))/2}"
+        case .segment:
+            return "𝑥(𝑡) = (1−𝑡)·\(n("x1")) + 𝑡·\(n("x2")), 𝑦(𝑡) = (1−𝑡)·\(n("y1")) + 𝑡·\(n("y2")), 𝑡∈[0,1]"
+        case .ray:
+            return "𝑥(𝑡) = \(n("x0")) + 𝑡·\(n("length"))·cos \(n("angle"))°, 𝑦(𝑡) = \(n("y0")) + 𝑡·\(n("length"))·sin \(n("angle"))°, 𝑡∈[0,1]"
+        case .polyline:
+            return "⋃ᵢ{(1−𝑡)𝑉ᵢ + 𝑡𝑉ᵢ₊₁ : 𝑡∈[0,1]}, 𝑉₁=(\(n("x1")),\(n("y1"))), 𝑉₂=(\(n("x2")),\(n("y2"))), 𝑉₃=(\(n("x3")),\(n("y3")))"
+        case .arc:
+            return "𝑥(𝑡) = \(n("r"))·cos 𝑡, 𝑦(𝑡) = \(n("r"))·sin 𝑡, 𝑡∈[\(n("startAngle"))°,\(n("endAngle"))°]"
+        case .quadBezier:
+            return "𝑥(𝑡) = (1−𝑡)²·(−50) + 2(1−𝑡)𝑡·\(n("cx")) + 𝑡²·\(n("x1")), 𝑦(𝑡) = (1−𝑡)²·0 + 2(1−𝑡)𝑡·\(n("cy")) + 𝑡²·\(n("y1")), 𝑡∈[0,1]"
+        case .cubicBezier:
+            return "𝑥(𝑡) = (1−𝑡)³·(−50) + 3(1−𝑡)²𝑡·\(n("c1x")) + 3(1−𝑡)𝑡²·\(n("c2x")) + 𝑡³·50, 𝑦(𝑡) = 3(1−𝑡)²𝑡·\(n("c1y")) + 3(1−𝑡)𝑡²·\(n("c2y")), 𝑡∈[0,1]"
+        case .circle:
+            return "𝑥(𝑡) = \(n("r"))·cos 𝑡, 𝑦(𝑡) = \(n("r"))·sin 𝑡, 𝑡∈[0,2π]"
+        case .ellipse:
+            return "𝑥(𝑡) = \(n("rx"))·cos 𝑡, 𝑦(𝑡) = \(n("ry"))·sin 𝑡, 𝑡∈[0,2π]"
+        case .polygon:
+            let sides = n("sides")
+            return "𝑘=⌊\(sides)𝑡⌋, 𝑠=\(sides)𝑡−𝑘, 𝜃ⱼ=2π𝑗/\(sides)−π/2 :  𝑥(𝑡) = \(n("r"))[(1−𝑠)cos 𝜃ₖ + 𝑠·cos 𝜃ₖ₊₁], 𝑦(𝑡) = \(n("r"))[(1−𝑠)sin 𝜃ₖ + 𝑠·sin 𝜃ₖ₊₁], 𝑡∈[0,1]"
+        case .star:
+            let points = n("points")
+            return "𝑘=⌊2·\(points)·𝑡⌋, 𝑠=2·\(points)·𝑡−𝑘, 𝑟ⱼ=\(n("rOuter")) (𝑗 짝수) 또는 \(n("rInner")) (𝑗 홀수), 𝜃ⱼ=π𝑗/\(points)−π/2 :  𝑥(𝑡) = (1−𝑠)𝑟ₖcos 𝜃ₖ + 𝑠𝑟ₖ₊₁cos 𝜃ₖ₊₁, 𝑦(𝑡) = (1−𝑠)𝑟ₖsin 𝜃ₖ + 𝑠𝑟ₖ₊₁sin 𝜃ₖ₊₁"
+        case .sine:
+            return "𝑦 = \(n("amplitude"))·sin(\(n("frequency"))·𝑥 + \(n("phase")))"
+        case .cosine:
+            return "𝑦 = \(n("amplitude"))·cos(\(n("frequency"))·𝑥 + \(n("phase")))"
+        case .lissajous:
+            return "𝑥(𝑡) = \(n("scale"))·sin(\(n("a"))𝑡 + \(n("delta"))), 𝑦(𝑡) = \(n("scale"))·sin(\(n("b"))𝑡), 𝑡∈[0,2π]"
+        case .spiral:
+            return "𝑥(θ) = (\(n("a")) + \(n("b"))θ)·cos θ, 𝑦(θ) = (\(n("a")) + \(n("b"))θ)·sin θ, θ∈[0,\(sweep("turns"))]"
+        case .logSpiral:
+            return "𝑥(θ) = \(n("a"))·𝑒^(\(n("b"))θ)·cos θ, 𝑦(θ) = \(n("a"))·𝑒^(\(n("b"))θ)·sin θ, θ∈[0,\(sweep("turns"))]"
+        case .rose:
+            return "𝑥(θ) = \(n("r"))·cos(\(Int(p["k"] ?? 4))θ)·cos θ, 𝑦(θ) = \(n("r"))·cos(\(Int(p["k"] ?? 4))θ)·sin θ, θ∈[0,2π]"
+        case .cardioid:
+            return "𝑥(θ) = \(n("a"))(1 − cos θ)cos θ, 𝑦(θ) = \(n("a"))(1 − cos θ)sin θ, θ∈[0,2π]"
+        case .astroid:
+            return "𝑥(θ) = \(n("a"))cos³θ, 𝑦(θ) = \(n("a"))sin³θ, θ∈[0,2π]"
+        case .epicycloid:
+            let R = n("R"), r = n("r")
+            return "𝑥(θ) = (\(R)+\(r))cos θ − \(r)·cos(((\(R)+\(r))/\(r))θ), 𝑦(θ) = (\(R)+\(r))sin θ − \(r)·sin(((\(R)+\(r))/\(r))θ), θ∈[0,\(sweep("turns"))]"
+        case .hypocycloid:
+            let R = n("R"), r = n("r")
+            return "𝑥(θ) = (\(R)−\(r))cos θ + \(r)·cos(((\(R)−\(r))/\(r))θ), 𝑦(θ) = (\(R)−\(r))sin θ − \(r)·sin(((\(R)−\(r))/\(r))θ), θ∈[0,\(sweep("turns"))]"
         }
     }
 }
