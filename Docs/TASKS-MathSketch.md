@@ -92,6 +92,7 @@
 1. **축퇴 바운딩 박스 중심 오류**: `boundingBox`가 폭/높이를 최소 1로 강제하면서 origin은 그대로 둬, 점 하나처럼 폭이 0인 도형의 중심이 실제 좌표에서 0.5만큼 어긋났고, 그 어긋남이 (좁은 박스 때문에 생긴) 거대한 스케일과 곱해져 도형이 캔버스 구석으로 튀었다. → 중심 계산은 정확한 박스로, 스케일 계산만 별도로 최소 extent를 적용하도록 분리.
 2. **탭 선택 불가**: `DragGesture(minimumDistance: 2)`는 이동이 없는 순수 탭에서 `onChanged`가 전혀 호출되지 않아, 이미 배치된 도형을 다시 탭해 선택하는 것이 거의 항상 실패했다. → `minimumDistance: 0`.
 3. **인스펙터-탭바 겹침**: 인스펙터가 스크롤 콘텐츠 안에 있어 플로팅 탭바 캡슐과 겹칠 수 있었고(특히 비틀기 슬라이더), 겹친 상태에서 슬라이더를 드래그하면 탭이 전환돼 버렸다. → `InspectorView`를 `.safeAreaInset(edge: .bottom)`으로 스크롤 밖에 고정해 SwiftUI가 탭바 위 공간을 항상 확보하도록 변경(높이가 바뀌어도 안전).
+4. **실기기 빌드 실패 (2026-10-13, 무료 Apple ID 계정)**: 실제 iPhone을 대상으로 빌드하면 두 에러가 났다 — (a) `Failed Registering Bundle Identifier: "devplaceholder.CFRNO3IL.MathSketch" cannot be registered ... not available`: Xcode가 타깃 생성 시 자동 부여한 `devplaceholder.<프로젝트해시>.<상품명>` placeholder 번들ID는 Apple 개발자 포털에 등록이 거부된다(유료 멤버십 유무와 무관하게 이 placeholder 패턴 자체가 문제). (b) `Provisioning profile "iOS Team Provisioning Profile: *" doesn't include signing certificate "Apple Development: Kim Minung (RCWSNGQMBH)"`: (a)의 결과로 생긴 매칭 안 되는 캐시된 프로파일 참조, (a)를 고치고 자동 서명이 재생성하면서 함께 해결됨. → `PRODUCT_BUNDLE_IDENTIFIER`를 앱 타깃은 `com.coulson.MathSketch`, 테스트 타깃은 `com.coulson.MathSketch.MathSketchTests`로 정상적인 역-DNS 문자열로 교체. 이후 실기기(iPhone, 무료 Apple ID 개인 팀, `DEVELOPMENT_TEAM=5Z8G42AVKD`) 빌드·설치·실행·테스트(66개) 전부 통과 확인 — **유료 Apple Developer Program 결제 없이도 실기기 테스트가 정상 동작**한다(7일 주기 재서명 등 무료 계정의 일반적인 제약은 남아있음).
 
 ## 알려진 설계 메모
 
