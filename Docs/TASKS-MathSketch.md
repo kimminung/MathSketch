@@ -94,6 +94,15 @@
 3. **인스펙터-탭바 겹침**: 인스펙터가 스크롤 콘텐츠 안에 있어 플로팅 탭바 캡슐과 겹칠 수 있었고(특히 비틀기 슬라이더), 겹친 상태에서 슬라이더를 드래그하면 탭이 전환돼 버렸다. → `InspectorView`를 `.safeAreaInset(edge: .bottom)`으로 스크롤 밖에 고정해 SwiftUI가 탭바 위 공간을 항상 확보하도록 변경(높이가 바뀌어도 안전).
 4. **실기기 빌드 실패 (2026-10-13, 무료 Apple ID 계정)**: 실제 iPhone을 대상으로 빌드하면 두 에러가 났다 — (a) `Failed Registering Bundle Identifier: "devplaceholder.CFRNO3IL.MathSketch" cannot be registered ... not available`: Xcode가 타깃 생성 시 자동 부여한 `devplaceholder.<프로젝트해시>.<상품명>` placeholder 번들ID는 Apple 개발자 포털에 등록이 거부된다(유료 멤버십 유무와 무관하게 이 placeholder 패턴 자체가 문제). (b) `Provisioning profile "iOS Team Provisioning Profile: *" doesn't include signing certificate "Apple Development: Kim Minung (RCWSNGQMBH)"`: (a)의 결과로 생긴 매칭 안 되는 캐시된 프로파일 참조, (a)를 고치고 자동 서명이 재생성하면서 함께 해결됨. → `PRODUCT_BUNDLE_IDENTIFIER`를 앱 타깃은 `com.coulson.MathSketch`, 테스트 타깃은 `com.coulson.MathSketch.MathSketchTests`로 정상적인 역-DNS 문자열로 교체. 이후 실기기(iPhone, 무료 Apple ID 개인 팀, `DEVELOPMENT_TEAM=5Z8G42AVKD`) 빌드·설치·실행·테스트(66개) 전부 통과 확인 — **유료 Apple Developer Program 결제 없이도 실기기 테스트가 정상 동작**한다(7일 주기 재서명 등 무료 계정의 일반적인 제약은 남아있음).
 
+## UX 개선 (2026-10-13, 실사용 피드백)
+
+실기기 테스트 후 사용자가 보고한 4가지 문제를 수정했다.
+
+1. **인스펙터가 그리기 시작과 동시에 화면을 가림**: `InspectorView`가 `.safeAreaInset(edge: .bottom)`으로 항상 떠 있는 데다 선택 즉시 슬라이더 5개+색상피커까지 전부 펼쳐져 캔버스 절반을 가렸다. → 헤더(쉐브론+도형명+한 줄 요약)만 보이는 **접힌 상태를 기본값**으로 바꾸고, 헤더를 탭하면 펼쳐지도록 `isExpanded` 토글 추가. 선택이 바뀌면 다시 접힌 상태로 리셋. 명시적 선택 해제(xmark.circle.fill) 버튼도 추가.
+2. **요소별 기본 크기가 제각각**: 23종 도형의 기본 매개변수가 서로 다른 스케일로 설계돼 있어(예: 사인파 기본 폭 200 vs 원 지름 80, 나선 반지름 150대) 같이 배치하면 크기 편차가 심했다. → `ShapeKind.parameterSchema`의 기본값을 전 도형이 지름 약 90~110 범위에 들도록 재조정(사인파 폭 200→100, 나선 반지름 공식 재계산, 베지어 고정 앵커 ±40→±50 등). 점/직선/면은 성격상 "지름" 개념이 달라 그대로 둠.
+3. **겹치거나 인접한 요소를 탭해도 엉뚱한 것이 선택됨**: `elementID(at:)`가 "확장된 바운딩 박스를 z-순서 역순으로 처음 맞는 것" 방식이라, 패딩(±14pt)된 박스끼리 겹치면 실제로 가까운 도형이 아니라 위에 있는(zIndex 큰) 도형이 항상 이겼다. → 바운딩 박스 대신 **탭 지점에서 각 도형의 실제 경로(선분/폴리곤)까지의 최단 거리**를 계산해 가장 가까운 도형을 선택하도록 `CanvasView`를 재작성(동일 거리일 때만 zIndex로 타이브레이크). `fill` 도형은 내부 터치 시 거리 0(point-in-polygon).
+4. **수식 패널의 "느낌" 개선**: 합성 수식 패널이 프로그래밍 DSL 텍스트(`circle(r: 50) · rotate(35)`)만 보여줘 작품이 아니라 코드처럼 읽혔다. → 표시 전용 포맷터 `ArtisticFormulaFormatter`를 신설해, 전체 그림을 "이 그림을 이루는 점들의 집합:" 머리말 + 각 요소를 𝑃₁(𝑡), 𝑃₂(𝑡)… 로 번호 매긴 이탤릭 수학 기호(𝑥, 𝑦, 𝑡) 표기 + 자연어 변형 주석(예: "회전 35°")으로 보여주는 한 편의 수식 선언문처럼 타이포그래피를 다듬었다. 원본 파싱 가능한 DSL 텍스트는 접이식 "원본 수식(복사·붙여넣기용)" 섹션으로 내려 복사/붙여넣기 용도로만 남겼다 — 파싱·왕복 변환 로직은 전혀 바뀌지 않았다.
+
 ## 알려진 설계 메모
 
 - "비틀기"는 수학적으로는 전단(shear) 변형이다. UI 라벨은 사용자 친화적으로 "비틀기"를 쓰되, 수식 표기는 `shear(shx, shy)`로 정확히 기술한다 (PRD FR-2).

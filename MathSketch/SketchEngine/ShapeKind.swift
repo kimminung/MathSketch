@@ -116,21 +116,21 @@ nonisolated enum ShapeKind: String, CaseIterable, Identifiable, Codable, Sendabl
             return [.init(name: "w", defaultValue: 100, range: 4...2000),
                     .init(name: "h", defaultValue: 60, range: 4...2000)]
         case .segment:
-            return [.init(name: "x1", defaultValue: -40, range: -2000...2000),
+            return [.init(name: "x1", defaultValue: -50, range: -2000...2000),
                     .init(name: "y1", defaultValue: 0, range: -2000...2000),
-                    .init(name: "x2", defaultValue: 40, range: -2000...2000),
+                    .init(name: "x2", defaultValue: 50, range: -2000...2000),
                     .init(name: "y2", defaultValue: 0, range: -2000...2000)]
         case .ray:
             return [.init(name: "x0", defaultValue: 0, range: -2000...2000),
                     .init(name: "y0", defaultValue: 0, range: -2000...2000),
                     .init(name: "angle", defaultValue: 0, range: -360...360),
-                    .init(name: "length", defaultValue: 120, range: 1...2000)]
+                    .init(name: "length", defaultValue: 100, range: 1...2000)]
         case .polyline:
-            return [.init(name: "x1", defaultValue: -40, range: -2000...2000),
+            return [.init(name: "x1", defaultValue: -50, range: -2000...2000),
                     .init(name: "y1", defaultValue: 30, range: -2000...2000),
                     .init(name: "x2", defaultValue: 0, range: -2000...2000),
                     .init(name: "y2", defaultValue: -30, range: -2000...2000),
-                    .init(name: "x3", defaultValue: 40, range: -2000...2000),
+                    .init(name: "x3", defaultValue: 50, range: -2000...2000),
                     .init(name: "y3", defaultValue: 30, range: -2000...2000)]
         case .arc:
             return [.init(name: "r", defaultValue: 50, range: 1...1000),
@@ -139,15 +139,15 @@ nonisolated enum ShapeKind: String, CaseIterable, Identifiable, Codable, Sendabl
         case .quadBezier:
             return [.init(name: "cx", defaultValue: 0, range: -1000...1000),
                     .init(name: "cy", defaultValue: 50, range: -1000...1000),
-                    .init(name: "x1", defaultValue: 40, range: -1000...1000),
+                    .init(name: "x1", defaultValue: 50, range: -1000...1000),
                     .init(name: "y1", defaultValue: 0, range: -1000...1000)]
         case .cubicBezier:
-            return [.init(name: "c1x", defaultValue: -20, range: -1000...1000),
-                    .init(name: "c1y", defaultValue: 60, range: -1000...1000),
-                    .init(name: "c2x", defaultValue: 20, range: -1000...1000),
-                    .init(name: "c2y", defaultValue: -60, range: -1000...1000)]
+            return [.init(name: "c1x", defaultValue: -25, range: -1000...1000),
+                    .init(name: "c1y", defaultValue: 55, range: -1000...1000),
+                    .init(name: "c2x", defaultValue: 25, range: -1000...1000),
+                    .init(name: "c2y", defaultValue: -55, range: -1000...1000)]
         case .circle:
-            return [.init(name: "r", defaultValue: 40, range: 1...1000)]
+            return [.init(name: "r", defaultValue: 50, range: 1...1000)]
         case .ellipse:
             return [.init(name: "rx", defaultValue: 50, range: 1...1000),
                     .init(name: "ry", defaultValue: 30, range: 1...1000)]
@@ -156,10 +156,10 @@ nonisolated enum ShapeKind: String, CaseIterable, Identifiable, Codable, Sendabl
                     .init(name: "r", defaultValue: 50, range: 1...1000)]
         case .star:
             return [.init(name: "points", defaultValue: 5, range: 3...12),
-                    .init(name: "rOuter", defaultValue: 60, range: 1...1000),
-                    .init(name: "rInner", defaultValue: 24, range: 1...1000)]
+                    .init(name: "rOuter", defaultValue: 50, range: 1...1000),
+                    .init(name: "rInner", defaultValue: 20, range: 1...1000)]
         case .sine, .cosine:
-            return [.init(name: "amplitude", defaultValue: 30, range: 1...500),
+            return [.init(name: "amplitude", defaultValue: 25, range: 1...500),
                     .init(name: "frequency", defaultValue: 2, range: 0.1...10),
                     .init(name: "phase", defaultValue: 0, range: -.pi...(.pi))]
         case .lissajous:
@@ -168,23 +168,27 @@ nonisolated enum ShapeKind: String, CaseIterable, Identifiable, Codable, Sendabl
                     .init(name: "delta", defaultValue: .pi / 2, range: -.pi...(.pi)),
                     .init(name: "scale", defaultValue: 50, range: 1...500)]
         case .spiral:
-            return [.init(name: "a", defaultValue: 2, range: 0...100),
-                    .init(name: "b", defaultValue: 8, range: 0.1...100),
+            return [.init(name: "a", defaultValue: 5, range: 0...100),
+                    .init(name: "b", defaultValue: 2.5, range: 0.1...100),
                     .init(name: "turns", defaultValue: 3, range: 0.25...12)]
         case .logSpiral:
             return [.init(name: "a", defaultValue: 5, range: 0.1...100),
-                    .init(name: "b", defaultValue: 0.2, range: 0.01...1),
+                    .init(name: "b", defaultValue: 0.19, range: 0.01...1),
                     .init(name: "turns", defaultValue: 2, range: 0.25...8)]
         case .rose:
             return [.init(name: "k", defaultValue: 4, range: 1...16),
-                    .init(name: "r", defaultValue: 60, range: 1...500)]
+                    .init(name: "r", defaultValue: 50, range: 1...500)]
         case .cardioid:
-            return [.init(name: "a", defaultValue: 40, range: 1...500)]
+            return [.init(name: "a", defaultValue: 35, range: 1...500)]
         case .astroid:
             return [.init(name: "a", defaultValue: 50, range: 1...500)]
-        case .epicycloid, .hypocycloid:
+        case .epicycloid:
             return [.init(name: "R", defaultValue: 30, range: 1...200),
                     .init(name: "r", defaultValue: 10, range: 1...200),
+                    .init(name: "turns", defaultValue: 6, range: 0.5...24)]
+        case .hypocycloid:
+            return [.init(name: "R", defaultValue: 50, range: 1...200),
+                    .init(name: "r", defaultValue: 15, range: 1...200),
                     .init(name: "turns", defaultValue: 6, range: 0.5...24)]
         }
     }
@@ -244,7 +248,7 @@ nonisolated enum ShapeKind: String, CaseIterable, Identifiable, Codable, Sendabl
             }
 
         case .quadBezier:
-            let p0 = CGPoint(x: -40, y: 0), c = CGPoint(x: p["cx"]!, y: p["cy"]!), p1 = CGPoint(x: p["x1"]!, y: p["y1"]!)
+            let p0 = CGPoint(x: -50, y: 0), c = CGPoint(x: p["cx"]!, y: p["cy"]!), p1 = CGPoint(x: p["x1"]!, y: p["y1"]!)
             let n = max(sampleCount, 2)
             return (0..<n).map { i in
                 let t = Double(i) / Double(n - 1)
@@ -255,7 +259,7 @@ nonisolated enum ShapeKind: String, CaseIterable, Identifiable, Codable, Sendabl
             }
 
         case .cubicBezier:
-            let p0 = CGPoint(x: -40, y: 0), p1 = CGPoint(x: 40, y: 0)
+            let p0 = CGPoint(x: -50, y: 0), p1 = CGPoint(x: 50, y: 0)
             let c1 = CGPoint(x: p["c1x"]!, y: p["c1y"]!), c2 = CGPoint(x: p["c2x"]!, y: p["c2y"]!)
             let n = max(sampleCount, 2)
             return (0..<n).map { i in
@@ -303,7 +307,7 @@ nonisolated enum ShapeKind: String, CaseIterable, Identifiable, Codable, Sendabl
         case .sine, .cosine:
             let amplitude = p["amplitude"]!, frequency = p["frequency"]!, phase = p["phase"]!
             let n = max(sampleCount, 8)
-            let width = 200.0
+            let width = 100.0
             return (0..<n).map { i in
                 let t = Double(i) / Double(n - 1)
                 let x = (t - 0.5) * width
@@ -391,29 +395,29 @@ nonisolated enum ShapeKind: String, CaseIterable, Identifiable, Codable, Sendabl
         let p = resolvedParameters(rawParams)
         func n(_ key: String) -> String { NumberText.format(p[key] ?? 0) }
         switch self {
-        case .point: return "P = (\(n("x")), \(n("y")))"
-        case .line: return "y = \(n("m"))·x + \(n("b"))"
-        case .plane: return "{(x,y) : |x| ≤ \(n("w"))/2, |y| ≤ \(n("h"))/2}"
+        case .point: return "𝑃 = (\(n("x")), \(n("y")))"
+        case .line: return "𝑦 = \(n("m"))·𝑥 + \(n("b"))"
+        case .plane: return "{(𝑥,𝑦) : |𝑥| ≤ \(n("w"))/2, |𝑦| ≤ \(n("h"))/2}"
         case .segment: return "(\(n("x1")),\(n("y1"))) → (\(n("x2")),\(n("y2")))"
-        case .ray: return "P₀=(\(n("x0")),\(n("y0"))), θ=\(n("angle"))°, L=\(n("length"))"
+        case .ray: return "𝑃₀=(\(n("x0")),\(n("y0"))), θ=\(n("angle"))°, 𝐿=\(n("length"))"
         case .polyline: return "(\(n("x1")),\(n("y1")))→(\(n("x2")),\(n("y2")))→(\(n("x3")),\(n("y3")))"
-        case .arc: return "x(t)=\(n("r"))·cos t, y(t)=\(n("r"))·sin t, t∈[\(n("startAngle"))°,\(n("endAngle"))°]"
-        case .quadBezier: return "B(t) = (1-t)²P₀ + 2(1-t)t·C + t²P₁, C=(\(n("cx")),\(n("cy")))"
-        case .cubicBezier: return "B(t) = 3차 베지어, C₁=(\(n("c1x")),\(n("c1y"))), C₂=(\(n("c2x")),\(n("c2y")))"
-        case .circle: return "x(t)=\(n("r"))·cos t, y(t)=\(n("r"))·sin t"
-        case .ellipse: return "x(t)=\(n("rx"))·cos t, y(t)=\(n("ry"))·sin t"
-        case .polygon: return "정\(Int(p["sides"] ?? 5))각형, r=\(n("r"))"
-        case .star: return "별 \(Int(p["points"] ?? 5))개 꼭짓점, rₒ=\(n("rOuter")), rᵢ=\(n("rInner"))"
-        case .sine: return "y = \(n("amplitude"))·sin(\(n("frequency"))·x + \(n("phase")))"
-        case .cosine: return "y = \(n("amplitude"))·cos(\(n("frequency"))·x + \(n("phase")))"
-        case .lissajous: return "x=\(n("scale"))·sin(\(n("a"))t+\(n("delta"))), y=\(n("scale"))·sin(\(n("b"))t)"
-        case .spiral: return "r = \(n("a")) + \(n("b"))θ"
-        case .logSpiral: return "r = \(n("a"))·e^(\(n("b"))θ)"
-        case .rose: return "r = \(n("r"))·cos(\(Int(p["k"] ?? 4))θ)"
-        case .cardioid: return "r = \(n("a"))(1 - cos θ)"
-        case .astroid: return "x=\(n("a"))cos³θ, y=\(n("a"))sin³θ"
-        case .epicycloid: return "에피사이클로이드, R=\(n("R")), r=\(n("r"))"
-        case .hypocycloid: return "하이포사이클로이드, R=\(n("R")), r=\(n("r"))"
+        case .arc: return "𝑥(𝑡)=\(n("r"))·cos 𝑡, 𝑦(𝑡)=\(n("r"))·sin 𝑡, 𝑡∈[\(n("startAngle"))°,\(n("endAngle"))°]"
+        case .quadBezier: return "𝐵(𝑡) = (1-𝑡)²𝑃₀ + 2(1-𝑡)𝑡·𝐶 + 𝑡²𝑃₁, 𝐶=(\(n("cx")),\(n("cy")))"
+        case .cubicBezier: return "𝐵(𝑡) = 3차 베지어, 𝐶₁=(\(n("c1x")),\(n("c1y"))), 𝐶₂=(\(n("c2x")),\(n("c2y")))"
+        case .circle: return "𝑥(𝑡)=\(n("r"))·cos 𝑡, 𝑦(𝑡)=\(n("r"))·sin 𝑡"
+        case .ellipse: return "𝑥(𝑡)=\(n("rx"))·cos 𝑡, 𝑦(𝑡)=\(n("ry"))·sin 𝑡"
+        case .polygon: return "정\(Int(p["sides"] ?? 5))각형, 𝑟=\(n("r"))"
+        case .star: return "별 \(Int(p["points"] ?? 5))개 꼭짓점, 𝑟ₒ=\(n("rOuter")), 𝑟ᵢ=\(n("rInner"))"
+        case .sine: return "𝑦 = \(n("amplitude"))·sin(\(n("frequency"))·𝑥 + \(n("phase")))"
+        case .cosine: return "𝑦 = \(n("amplitude"))·cos(\(n("frequency"))·𝑥 + \(n("phase")))"
+        case .lissajous: return "𝑥=\(n("scale"))·sin(\(n("a"))𝑡+\(n("delta"))), 𝑦=\(n("scale"))·sin(\(n("b"))𝑡)"
+        case .spiral: return "𝑟 = \(n("a")) + \(n("b"))θ"
+        case .logSpiral: return "𝑟 = \(n("a"))·𝑒^(\(n("b"))θ)"
+        case .rose: return "𝑟 = \(n("r"))·cos(\(Int(p["k"] ?? 4))θ)"
+        case .cardioid: return "𝑟 = \(n("a"))(1 - cos θ)"
+        case .astroid: return "𝑥=\(n("a"))cos³θ, 𝑦=\(n("a"))sin³θ"
+        case .epicycloid: return "에피사이클로이드, 𝑅=\(n("R")), 𝑟=\(n("r"))"
+        case .hypocycloid: return "하이포사이클로이드, 𝑅=\(n("R")), 𝑟=\(n("r"))"
         }
     }
 }

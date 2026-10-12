@@ -13,6 +13,7 @@ final class SketchModel {
     var selectedElementID: UUID?
 
     var formulaText: String = ""
+    var artisticNarrative: String = ""
     var paletteSwatches: [PaletteSwatch] = []
     var paletteCaption: String = ""
 
@@ -112,6 +113,7 @@ final class SketchModel {
 
     private func recomputeDerived() {
         formulaText = SketchFormulaFormatter.format(elements)
+        artisticNarrative = ArtisticFormulaFormatter.narrative(for: elements)
         paletteSwatches = PaletteSignature.swatches(for: elements)
         paletteCaption = PaletteSignature.caption(for: elements)
     }

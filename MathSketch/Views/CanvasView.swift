@@ -56,13 +56,80 @@ struct CanvasView: View {
         .accessibilityLabel(Text("스케치 캔버스, 요소 \(model.elements.count)개"))
     }
 
+    /// Picks the element whose actual rendered geometry is closest to the tap, not just the
+    /// topmost whose padded bounding box happens to contain it — a padded-box test made
+    /// adjacent or overlapping shapes impossible to tell apart (tapping right next to shape B
+    /// would keep selecting shape A if A's inflated box reached that far). Ties within 0.5pt
+    /// fall back to z-order (topmost wins).
     private func elementID(at location: CGPoint) -> UUID? {
-        for item in fitted.reversed() {
-            if let box = boundingBox(item.points)?.insetBy(dx: -14, dy: -14), box.contains(location) {
-                return item.element.id
+        let maxDistance: CGFloat = 28
+        var best: (id: UUID, distance: CGFloat, zIndex: Int)?
+        for item in fitted {
+            let distance = distanceToShape(location: location, item: item)
+            guard distance <= maxDistance else { continue }
+            if let current = best {
+                if distance < current.distance - 0.5 ||
+                    (abs(distance - current.distance) <= 0.5 && item.element.zIndex > current.zIndex) {
+                    best = (item.element.id, distance, item.element.zIndex)
+                }
+            } else {
+                best = (item.element.id, distance, item.element.zIndex)
             }
         }
-        return nil
+        return best?.id
+    }
+
+    private func distanceToShape(location: CGPoint, item: SketchCanvasRenderer.FittedElement) -> CGFloat {
+        switch item.element.shapeKind.renderStyle {
+        case .point:
+            guard let p = item.points.first else { return .greatestFiniteMagnitude }
+            return hypot(location.x - p.x, location.y - p.y)
+        case .fill:
+            if pointInPolygon(location, polygon: item.points) { return 0 }
+            return distanceToPolyline(location, points: item.points, closed: true)
+        case .stroke:
+            return distanceToPolyline(location, points: item.points, closed: item.element.shapeKind.isClosed)
+        }
+    }
+
+    private func distanceToPolyline(_ p: CGPoint, points: [CGPoint], closed: Bool) -> CGFloat {
+        guard points.count > 1 else {
+            guard let only = points.first else { return .greatestFiniteMagnitude }
+            return hypot(p.x - only.x, p.y - only.y)
+        }
+        var minDistance = CGFloat.greatestFiniteMagnitude
+        for i in 0..<(points.count - 1) {
+            minDistance = min(minDistance, distanceToSegment(p, points[i], points[i + 1]))
+        }
+        if closed, let first = points.first, let last = points.last {
+            minDistance = min(minDistance, distanceToSegment(p, last, first))
+        }
+        return minDistance
+    }
+
+    private func distanceToSegment(_ p: CGPoint, _ a: CGPoint, _ b: CGPoint) -> CGFloat {
+        let abx = b.x - a.x, aby = b.y - a.y
+        let lengthSquared = abx * abx + aby * aby
+        guard lengthSquared > 0 else { return hypot(p.x - a.x, p.y - a.y) }
+        var t = ((p.x - a.x) * abx + (p.y - a.y) * aby) / lengthSquared
+        t = max(0, min(1, t))
+        let projX = a.x + t * abx, projY = a.y + t * aby
+        return hypot(p.x - projX, p.y - projY)
+    }
+
+    private func pointInPolygon(_ p: CGPoint, polygon: [CGPoint]) -> Bool {
+        guard polygon.count > 2 else { return false }
+        var inside = false
+        var j = polygon.count - 1
+        for i in 0..<polygon.count {
+            let pi = polygon[i], pj = polygon[j]
+            if (pi.y > p.y) != (pj.y > p.y),
+               p.x < (pj.x - pi.x) * (p.y - pi.y) / (pj.y - pi.y) + pi.x {
+                inside.toggle()
+            }
+            j = i
+        }
+        return inside
     }
 
     private func boundingBox(_ points: [CGPoint]) -> CGRect? {
