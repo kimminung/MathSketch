@@ -25,6 +25,19 @@ final class SketchModel {
     private let draftSubject = PassthroughSubject<Void, Never>()
     private var cancellables = Set<AnyCancellable>()
 
+    // MARK: Undo/redo
+    // One snapshot per *discrete* action (add/delete/color/replace) or per *continuous gesture*
+    // (drag/pinch/rotate/slider) — never per onChanged tick, which would flood the stack with
+    // near-duplicate states. `beginContinuousEdit()` pushes once at gesture start and is a no-op
+    // for the rest of that gesture; `endContinuousEdit()` just re-arms it for the next one.
+    private static let maxHistory = 50
+    private var undoStack: [[SketchElement]] = []
+    private var redoStack: [[SketchElement]] = []
+    private var isContinuousEditActive = false
+
+    var canUndo: Bool { !undoStack.isEmpty }
+    var canRedo: Bool { !redoStack.isEmpty }
+
     init() {
         elements = DraftCanvasStore.shared.load()
         nextZIndex = (elements.map(\.zIndex).max() ?? -1) + 1
@@ -55,6 +68,7 @@ final class SketchModel {
 
     @discardableResult
     func addElement(kind: ShapeKind, at point: CGPoint) -> UUID {
+        pushUndoSnapshot()
         var element = SketchElement(shapeKind: kind, zIndex: nextZIndex)
         nextZIndex += 1
         element.transform.translateX = point.x
@@ -68,20 +82,33 @@ final class SketchModel {
 
     func deleteSelected() {
         guard let id = selectedElementID else { return }
+        pushUndoSnapshot()
         elements.removeAll { $0.id == id }
         selectedElementID = nil
         recomputeDerived()
         draftSubject.send()
     }
 
+    func clearAll() {
+        guard !elements.isEmpty else { return }
+        pushUndoSnapshot()
+        elements = []
+        selectedElementID = nil
+        nextZIndex = 0
+        recomputeDerived()
+        draftSubject.send()
+    }
+
     func updateSelectedColor(_ color: ElementColor) {
         guard let idx = selectedIndex else { return }
+        pushUndoSnapshot()
         elements[idx].color = color
         recomputeDerived()
         draftSubject.send()
     }
 
     func replaceAll(with newElements: [SketchElement]) {
+        pushUndoSnapshot()
         elements = newElements
         nextZIndex = (elements.map(\.zIndex).max() ?? -1) + 1
         selectedElementID = nil
@@ -99,7 +126,40 @@ final class SketchModel {
         }
     }
 
+    func undo() {
+        guard let previous = undoStack.popLast() else { return }
+        redoStack.append(elements)
+        elements = previous
+        nextZIndex = (elements.map(\.zIndex).max() ?? -1) + 1
+        selectedElementID = nil
+        recomputeDerived()
+        draftSubject.send()
+    }
+
+    func redo() {
+        guard let next = redoStack.popLast() else { return }
+        undoStack.append(elements)
+        elements = next
+        nextZIndex = (elements.map(\.zIndex).max() ?? -1) + 1
+        selectedElementID = nil
+        recomputeDerived()
+        draftSubject.send()
+    }
+
     // MARK: Continuous gesture updates (debounced heavy recompute, instant autosave signal)
+
+    /// Call once when a drag/pinch/rotate/slider interaction begins, before the first
+    /// `updateSelectedTransform`. Repeated calls while the same gesture is still in progress
+    /// are ignored, so the undo stack gets exactly one entry per gesture, not one per frame.
+    func beginContinuousEdit() {
+        guard !isContinuousEditActive else { return }
+        isContinuousEditActive = true
+        pushUndoSnapshot()
+    }
+
+    func endContinuousEdit() {
+        isContinuousEditActive = false
+    }
 
     func updateSelectedTransform(_ mutate: (inout ElementTransform) -> Void) {
         guard let idx = selectedIndex else { return }
@@ -110,6 +170,12 @@ final class SketchModel {
     }
 
     // MARK: Derived state
+
+    private func pushUndoSnapshot() {
+        undoStack.append(elements)
+        if undoStack.count > Self.maxHistory { undoStack.removeFirst() }
+        redoStack.removeAll()
+    }
 
     private func recomputeDerived() {
         formulaText = SketchFormulaFormatter.format(elements)

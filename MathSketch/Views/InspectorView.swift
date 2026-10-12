@@ -96,9 +96,11 @@ struct InspectorView: View {
     private func sliderRow(_ title: String, value: Binding<Double>, range: ClosedRange<Double>, suffix: String = "") -> some View {
         HStack {
             Text(title).font(.caption).frame(width: 64, alignment: .leading)
-            Slider(value: value, in: range)
-                .accessibilityLabel(Text(title))
-                .accessibilityValue(Text("\(NumberText.format(value.wrappedValue))\(suffix)"))
+            Slider(value: value, in: range) { editing in
+                if editing { model.beginContinuousEdit() } else { model.endContinuousEdit() }
+            }
+            .accessibilityLabel(Text(title))
+            .accessibilityValue(Text("\(NumberText.format(value.wrappedValue))\(suffix)"))
             Text("\(NumberText.format(value.wrappedValue))\(suffix)")
                 .font(.caption.monospacedDigit())
                 .frame(width: 52, alignment: .trailing)

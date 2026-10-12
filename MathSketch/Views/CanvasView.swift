@@ -157,6 +157,11 @@ struct CanvasView: View {
                     fitScaleSnapshot = SketchCanvasRenderer.fitScale(elements: model.elements, in: canvasRect)
                 }
                 guard let start = dragStartTransform, let scale = fitScaleSnapshot, scale > 0 else { return }
+                // Only enters the undo stack once the finger has actually moved — a plain tap
+                // that merely selects a shape (translation ~0) shouldn't burn an undo entry.
+                if abs(value.translation.width) > 1 || abs(value.translation.height) > 1 {
+                    model.beginContinuousEdit()
+                }
                 let dx = Double(value.translation.width) / Double(scale)
                 let dy = -Double(value.translation.height) / Double(scale)
                 model.updateSelectedTransform { t in
@@ -165,6 +170,7 @@ struct CanvasView: View {
                 }
             }
             .onEnded { _ in
+                model.endContinuousEdit()
                 dragStartTransform = nil
                 fitScaleSnapshot = nil
             }
@@ -176,12 +182,16 @@ struct CanvasView: View {
                 guard model.selectedElementID != nil else { return }
                 if scaleGestureStart == nil { scaleGestureStart = model.selectedElement?.transform }
                 guard let start = scaleGestureStart else { return }
+                if abs(value.magnification - 1) > 0.01 { model.beginContinuousEdit() }
                 model.updateSelectedTransform { t in
                     t.scaleX = start.scaleX * value.magnification
                     t.scaleY = start.scaleY * value.magnification
                 }
             }
-            .onEnded { _ in scaleGestureStart = nil }
+            .onEnded { _ in
+                model.endContinuousEdit()
+                scaleGestureStart = nil
+            }
     }
 
     private var rotateGesture: some Gesture {
@@ -190,10 +200,14 @@ struct CanvasView: View {
                 guard model.selectedElementID != nil else { return }
                 if rotateGestureStart == nil { rotateGestureStart = model.selectedElement?.transform.rotationDegrees }
                 guard let start = rotateGestureStart else { return }
+                if abs(value.rotation.degrees) > 0.5 { model.beginContinuousEdit() }
                 model.updateSelectedTransform { t in
                     t.rotationDegrees = start + value.rotation.degrees
                 }
             }
-            .onEnded { _ in rotateGestureStart = nil }
+            .onEnded { _ in
+                model.endContinuousEdit()
+                rotateGestureStart = nil
+            }
     }
 }
