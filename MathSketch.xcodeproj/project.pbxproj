@@ -6,10 +6,21 @@
 	objectVersion = 90;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		6885F845307D6C6D005908AE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 000000000000000000000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 000000000000000100000000;
+			remoteInfo = MathSketch;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* MathSketch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MathSketch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6885F7F0307D4621005908AE /* PRD-MathSketch.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "PRD-MathSketch.md"; sourceTree = "<group>"; };
 		6885F7F1307D4646005908AE /* TASKS-MathSketch.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "TASKS-MathSketch.md"; sourceTree = "<group>"; };
+		6885F841307D6C6D005908AE /* MathSketchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MathSketchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -18,10 +29,20 @@
 			path = MathSketch;
 			sourceTree = "<group>";
 		};
+		6885F842307D6C6D005908AE /* MathSketchTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = MathSketchTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		000000000000000130000000 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		6885F83E307D6C6D005908AE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
 			);
@@ -33,8 +54,10 @@
 			isa = PBXGroup;
 			children = (
 				000000000000000000000010 /* MathSketch */,
+				6885F842307D6C6D005908AE /* MathSketchTests */,
 				000000000000000000000020 /* Products */,
 				6885F7EF307D4621005908AE /* Docs */,
+				6885F804307D498E005908AE /* Media */,
 			);
 			sourceTree = "<group>";
 		};
@@ -42,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				000000000000000000000120 /* MathSketch.app */,
+				6885F841307D6C6D005908AE /* MathSketchTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -53,6 +77,29 @@
 				6885F7F1307D4646005908AE /* TASKS-MathSketch.md */,
 			);
 			path = Docs;
+			sourceTree = "<group>";
+		};
+		6885F804307D498E005908AE /* Media */ = {
+			isa = PBXGroup;
+			children = (
+				6885F807307D4991005908AE /* Screenshots */,
+				6885F808307D4991005908AE /* Video */,
+			);
+			path = Media;
+			sourceTree = "<group>";
+		};
+		6885F807307D4991005908AE /* Screenshots */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Screenshots;
+			sourceTree = "<group>";
+		};
+		6885F808307D4991005908AE /* Video */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Video;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -76,6 +123,27 @@
 			productReference = 000000000000000000000120 /* MathSketch.app */;
 			productType = "com.apple.product-type.application";
 		};
+		6885F840307D6C6D005908AE /* MathSketchTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6885F847307D6C6D005908AE /* Build configuration list for PBXNativeTarget "MathSketchTests" */;
+			buildPhases = (
+				6885F83D307D6C6D005908AE /* Sources */,
+				6885F83E307D6C6D005908AE /* Frameworks */,
+				6885F83F307D6C6D005908AE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6885F846307D6C6D005908AE /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				6885F842307D6C6D005908AE /* MathSketchTests */,
+			);
+			name = MathSketchTests;
+			productName = MathSketchTests;
+			productReference = 6885F841307D6C6D005908AE /* MathSketchTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -83,11 +151,15 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2630;
+				LastSwiftUpdateCheck = 2700;
 				LastUpgradeCheck = 2700;
 				TargetAttributes = {
 					000000000000000100000000 = {
 						CreatedOnToolsVersion = 26.3;
+					};
+					6885F840307D6C6D005908AE = {
+						CreatedOnToolsVersion = 27.0;
+						TestTargetID = 000000000000000100000000;
 					};
 				};
 			};
@@ -106,12 +178,18 @@
 			projectRoot = "";
 			targets = (
 				000000000000000100000000 /* MathSketch */,
+				6885F840307D6C6D005908AE /* MathSketchTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		000000000000000140000000 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		6885F83F307D6C6D005908AE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
 			);
@@ -124,7 +202,20 @@
 			files = (
 			);
 		};
+		6885F83D307D6C6D005908AE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		6885F846307D6C6D005908AE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 000000000000000100000000 /* MathSketch */;
+			targetProxy = 6885F845307D6C6D005908AE /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		000000000000000011000000 /* Debug configuration for PBXProject "MathSketch" */ = {
@@ -287,13 +378,13 @@
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -325,13 +416,63 @@
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		6885F848307D6C6D005908AE /* Debug configuration for PBXNativeTarget "MathSketchTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = devplaceholder.CFRNO3IL.MathSketch.MathSketchTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MathSketch.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MathSketch";
+				XROS_DEPLOYMENT_TARGET = 27.0;
+			};
+			name = Debug;
+		};
+		6885F849307D6C6D005908AE /* Release configuration for PBXNativeTarget "MathSketchTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = devplaceholder.CFRNO3IL.MathSketch.MathSketchTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MathSketch.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MathSketch";
+				XROS_DEPLOYMENT_TARGET = 27.0;
 			};
 			name = Release;
 		};
@@ -351,6 +492,14 @@
 			buildConfigurations = (
 				000000000000000111000000 /* Debug configuration for PBXNativeTarget "MathSketch" */,
 				000000000000000112000000 /* Release configuration for PBXNativeTarget "MathSketch" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		6885F847307D6C6D005908AE /* Build configuration list for PBXNativeTarget "MathSketchTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6885F848307D6C6D005908AE /* Debug configuration for PBXNativeTarget "MathSketchTests" */,
+				6885F849307D6C6D005908AE /* Release configuration for PBXNativeTarget "MathSketchTests" */,
 			);
 			defaultConfigurationName = Release;
 		};
