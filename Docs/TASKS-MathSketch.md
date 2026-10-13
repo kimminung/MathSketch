@@ -111,6 +111,15 @@
    - **미해결 블로커**: 자산 자체는 커밋돼 있지만, `ASSETCATALOG_COMPILER_APPICON_NAME`(App Icon Source) 빌드 설정을 이 환경의 `UpdateTargetBuildSetting` 도구가 "Unknown build setting"으로 거부해 자동 연결하지 못했다(Apple 공식 문서는 이 설정명이 현재도 유효하다고 확인되므로 도구 쪽 화이트리스트 누락으로 보인다). pbxproj를 직접 텍스트 편집하는 우회도 시도하지 않았다 — Xcode가 열려 있는 동안 프로젝트 파일을 직접 건드리면 손상 위험이 있어 금지된 조작이기 때문이다. **사용자가 Xcode에서 타깃 → General → App Icons and Launch Screen → App Icon Source를 "AppIcon"으로 선택하는 수동 작업 한 번이 필요하다.**
 4. **수식의 "느낌"을 레퍼런스와 동일하게**: 1차 라운드의 요약형 표기(예: "별 5개 꼭짓점, rₒ=50")를 긴 사용자 지정 레퍼런스가 지향하는 것과 같은 "생략 없는 전체 트리고노메트릭 방정식" 스타일로 교체(위 1번 항목과 동일 작업). 레퍼런스의 구체적 출처는 사용자 요청에 따라 코드·커밋·문서 어디에도 이름을 남기지 않았다.
 
+## visionOS 레이어드 아이콘 조사 (2026-10-13)
+
+사용자가 "visionOS용 앱 아이콘을 Apple 문서에 맞게 완성"을 요청해, 단일 이미지보다 더 정확한 구현을 시도했다.
+
+- **Apple 공식 문서로 확인한 사실**: visionOS 앱 아이콘은 배경 레이어 + 그 위에 1~2개 레이어(최대 3layer)로 구성되는 것이 정식 권장 방식이며("A visionOS app icon includes a background layer and one or two layers on top... shadows... alpha channel... embossed appearance"), 이 레이어 구성은 **Icon Composer가 아니라 에셋 카탈로그의 "이미지 스택"**으로 만든다("For tvOS and visionOS targets that still use an AppIcon asset catalog..."). 단, 같은 문서에서 "단일 1024×1024 이미지 한 장"도 명시적으로 유효한 방법이라고 밝히고 있다("For visionOS, you need to supply a single 1024x1024 pixel asset") — 즉 둘 다 "Apple 문서에 맞는" 방법이다.
+- **직접 시도**: 흰 꽃잎(앞)·반투명 그림자(중간)·그라디언트(뒤) 3장을 렌더링하고, `AppIcon.imagestack/{Back,Middle,Front}.imagestacklayer/Content.imageset/...png` + 각 단계 `Contents.json`을 추정 스키마로 직접 구성해 실제로 커밋 전에 **빌드해서 actool 로그로 검증**했다. 결과: actool이 이 폴더를 전혀 인식하지 않음(로그에 흔적이 없음 — 기존 `.appiconset`의 visionOS 항목에는 경고가 남았던 것과 대조적) → 확장자/스키마 추정이 틀렸다는 뜻. Apple 공식 문서는 이 내부 포맷을 JSON 스키마로 공개하지 않고 "Xcode에서 Add 버튼으로 레이어를 추가하고 Finder에서 이미지를 드래그하라"는 GUI 절차만 안내한다 — 즉 **이 포맷은 애초에 텍스트로 직접 작성하도록 문서화되어 있지 않다.**
+- **최종 처리**: 작동하지 않는 추정 구조는 제거하고, 렌더링된 3장(Back/Middle/Front)을 `Media/AppIconLayers-VisionOS/`에 일반 PNG 소스 파일로 보관했다 — visionOS 타깃이 생기고 나서 Xcode Asset Catalog 편집기에 이 3장을 그대로 드래그해 넣으면 Apple이 문서화한 정식 절차 그대로 완성된다. 기존 `AppIcon.appiconset`(ios+visionos 플랫폼 항목이 같은 단일 1024 이미지를 가리키는 구성)은 그대로 유지 — 이것 자체로 "Apple 문서가 명시한 visionOS 유효 방법" 중 하나이므로 틀린 것이 아니다.
+- **교훈**: Xcode 자산 카탈로그의 특수 번들 타입(이미지 스택 등)은 Apple이 공개 문서로 스키마를 제공하지 않는 경우가 있다 — 이럴 때는 추측으로 텍스트를 작성하지 말고, (a) 빌드해서 actool 로그에 흔적이 남는지로 최소 검증하거나, (b) Apple이 실제로 보장하는 대체 경로(이 경우 단일 이미지)로 완성하고 나머지는 "GUI로 드래그만 하면 되는 준비된 소스"로 넘기는 것이 안전하다.
+
 ## 알려진 설계 메모
 
 - "비틀기"는 수학적으로는 전단(shear) 변형이다. UI 라벨은 사용자 친화적으로 "비틀기"를 쓰되, 수식 표기는 `shear(shx, shy)`로 정확히 기술한다 (PRD FR-2).

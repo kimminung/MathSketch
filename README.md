@@ -67,7 +67,14 @@
 
 <img src="MathSketch/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png" width="120">
 
-앱 자신의 장미 곡선(rose curve) 도형 엔진으로 그린 아이콘 — 보라-자홍-주황 그라디언트 위에 흰 꽃잎 다섯 장. iOS/iPadOS와 **향후 visionOS 포팅을 대비**해 하나의 1024×1024 원본을 두 플랫폼 모두에 쓰도록 자산 카탈로그를 구성했다(Apple 문서상 visionOS는 단일 1024×1024 이미지로도 충분; 레이어 분리 패럴랙스 스택은 나중에 필요해지면 추가).
+앱 자신의 장미 곡선(rose curve) 도형 엔진으로 그린 아이콘 — 보라-자홍-주황 그라디언트 위에 흰 꽃잎 다섯 장. iOS/iPadOS와 visionOS 모두 하나의 1024×1024 원본을 쓰도록 자산 카탈로그를 구성했다 — Apple 공식 문서가 "visionOS는 단일 1024×1024 이미지로 충분하다"고 명시한 방법 그대로다.
+
+**visionOS 깊이감 레이어(배경·중간·전경)도 미리 만들어 뒀다.** Apple 문서에 따르면 더 입체적인 visionOS 아이콘은 레이어 3장을 에셋 카탈로그의 "이미지 스택"으로 쌓아 만드는데, 이 내부 포맷은 Apple이 JSON으로 공개하지 않고 Xcode에서 레이어를 추가한 뒤 Finder에서 이미지를 드래그하는 GUI 절차로만 안내되어 있다. 그래서 스키마를 추정해 직접 작성해보고 실제로 빌드해 actool 로그로 검증했지만 인식되지 않았다(근거 없는 파일을 "완성"이라 우기지 않기 위해) — 대신 완성된 레이어 3장을 바로 드래그해 넣을 수 있는 PNG로 `Media/AppIconLayers-VisionOS/`에 보관해 뒀다. visionOS 타깃이 생기면 이 3장을 에셋 카탈로그의 이미지 스택 레이어에 끌어다 놓기만 하면 된다.
+
+<div align="center">
+<img src="Media/AppIconLayers-VisionOS/Back.png" width="18%"> <img src="Media/AppIconLayers-VisionOS/Middle.png" width="18%"> <img src="Media/AppIconLayers-VisionOS/Front.png" width="18%">
+</div>
+<p align="center"><sub>뒤(그라디언트 배경) · 중간(그림자 실루엣) · 앞(선명한 꽃잎+중심점) — 셋을 겹치면 깊이감 있는 visionOS 아이콘이 된다</sub></p>
 
 ## 아키텍처
 
@@ -92,7 +99,9 @@ MathSketchTests/          # Swift Testing, 66개 테스트 (엔진 왕복 변환
 Docs/
   PRD-MathSketch.md        # 기술 PRD (FR-1~FR-9, FR-5a)
   TASKS-MathSketch.md      # Phase 0~9 + 이후 UX 개선 라운드 태스크 로그·버그·설계 변경 메모
-Media/Screenshots/
+Media/
+  Screenshots/
+  AppIconLayers-VisionOS/  # Back/Middle/Front.png — visionOS 이미지 스택용 레이어 소스(GUI로 드래그해 넣을 준비물)
 ```
 
 ## 요구 사항 및 실행
@@ -115,7 +124,7 @@ Swift Testing 기반 66개 테스트 전체 통과: MathEngine(Lexer/Parser/Eval
 - iPhone 16 시뮬레이터에서는 수동 QA로 전 기능(조립·제스처·실행취소/다시실행·전체지우기·합성 수식·역변환·팔레트 서명·저장·재실행 복원)을 검증했고, **실제 iPhone(유료 Apple Developer Program 미가입, 무료 개인 팀 서명)에서도 빌드·설치·실행·테스트 66개 전체 통과**를 확인했다. 초기에는 Xcode가 자동 부여한 `devplaceholder.*` placeholder 번들 ID 때문에 실기기 등록이 거부됐는데, 정상적인 역-DNS 번들 ID(`com.coulson.MathSketch`)로 바꿔 해결했다 — 유료 멤버십은 실기기 디버그 실행 자체에는 필요 없다.
 - **iPad 시뮬레이터 검증은 이 환경에서 iPad 시뮬레이터를 새로 생성하는 도구 호출이 반복적으로 타임아웃되어 보류되었다** — iPad 기기/시뮬레이터가 이미 있는 환경에서는 동일 빌드로 바로 검증 가능할 것으로 예상된다 (`TARGETED_DEVICE_FAMILY`에 iPad 포함, 레이아웃은 가변 스택이라 깨지지는 않지만 iPad 전용 멀티컬럼 레이아웃은 아직 없음).
 - 캔버스 조작은 드래그(이동) + 두 손가락 핀치/회전(균일 스케일/회전) + 인스펙터 슬라이더(비균일 스케일/비틀기/색)로 구현되어 있다 — PRD가 언급한 전용 모서리/회전/비틀기 "핸들" 오버레이 대신 이 조합을 택했다(Docs/TASKS-MathSketch.md 설계 메모 참고).
-- visionOS 전용 타깃은 아직 없다 — 아이콘만 "준비완료" 상태이고, 실제 포팅(2D 창 vs 볼륨/공간 레이아웃 재설계)은 후속 작업이다.
+- visionOS 전용 타깃은 아직 없다 — 아이콘(단일 이미지 버전 적용 완료 + 깊이감 레이어 3장 소스 준비완료)만 "준비완료" 상태이고, 실제 포팅(2D 창 vs 볼륨/공간 레이아웃 재설계, 이미지 스택에 레이어 3장 드래그)은 후속 작업이다.
 
 ## 참고 프로젝트
 
