@@ -12,6 +12,14 @@
 ![License](https://img.shields.io/badge/license-Apache%202.0-green)
 ![Tests](https://img.shields.io/badge/tests-66%20passed-success)
 
+<br/>
+
+<img src="Media/Video/intro.gif" width="100%" alt="MathSketch 소개 영상 — 23종 수식 도형 · 조립과 변형 · 그림 전체가 하나의 수식으로 · 팔레트 서명과 갤러리" />
+
+<sub>▶︎ 41초 소개 영상 (자동 재생) — 23종 수식 도형 → 드래그·핀치·회전·비틀기로 조립 → 그림 전체를 하나의 수식으로, 수식에서 다시 그리기 → 팔레트 서명 · 갤러리. <a href="Media/Video/intro.mp4">고화질 MP4로 보기</a></sub>
+
+<br/><br/>
+
 <img src="Media/Screenshots/phase3-canvas-overview.png" width="23%"> <img src="Media/Screenshots/phase4-inspector-sliders.png" width="23%"> <img src="Media/Screenshots/phase10-full-formula-toolbar.png" width="23%"> <img src="Media/Screenshots/phase6-gallery-detail.png" width="23%">
 
 </div>
@@ -102,6 +110,7 @@ Docs/
 Media/
   Screenshots/
   AppIconLayers-VisionOS/  # Back/Middle/Front.png — visionOS 이미지 스택용 레이어 소스(GUI로 드래그해 넣을 준비물)
+  Video/                   # README 소개 영상 intro.gif(자동 재생) · intro.mp4 + 생성기 src/(앱 엔진 JS 포트, Playwright 렌더러)
 ```
 
 ## 요구 사항 및 실행
