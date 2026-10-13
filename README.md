@@ -14,6 +14,10 @@
 
 <br/>
 
+
+https://github.com/user-attachments/assets/bf4c561f-6453-4a38-a67b-7d0c2437d687
+
+
 <img src="Media/Video/intro.gif" width="100%" alt="MathSketch 소개 영상 — 23종 수식 도형 · 조립과 변형 · 그림 전체가 하나의 수식으로 · 팔레트 서명과 갤러리" />
 
 <sub>▶︎ 41초 소개 영상 (자동 재생) — 23종 수식 도형 → 드래그·핀치·회전·비틀기로 조립 → 그림 전체를 하나의 수식으로, 수식에서 다시 그리기 → 팔레트 서명 · 갤러리. <a href="Media/Video/intro.mp4">고화질 MP4로 보기</a></sub>
