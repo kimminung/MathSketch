@@ -120,6 +120,12 @@
 - **최종 처리**: 작동하지 않는 추정 구조는 제거하고, 렌더링된 3장(Back/Middle/Front)을 `Media/AppIconLayers-VisionOS/`에 일반 PNG 소스 파일로 보관했다 — visionOS 타깃이 생기고 나서 Xcode Asset Catalog 편집기에 이 3장을 그대로 드래그해 넣으면 Apple이 문서화한 정식 절차 그대로 완성된다. 기존 `AppIcon.appiconset`(ios+visionos 플랫폼 항목이 같은 단일 1024 이미지를 가리키는 구성)은 그대로 유지 — 이것 자체로 "Apple 문서가 명시한 visionOS 유효 방법" 중 하나이므로 틀린 것이 아니다.
 - **교훈**: Xcode 자산 카탈로그의 특수 번들 타입(이미지 스택 등)은 Apple이 공개 문서로 스키마를 제공하지 않는 경우가 있다 — 이럴 때는 추측으로 텍스트를 작성하지 말고, (a) 빌드해서 actool 로그에 흔적이 남는지로 최소 검증하거나, (b) Apple이 실제로 보장하는 대체 경로(이 경우 단일 이미지)로 완성하고 나머지는 "GUI로 드래그만 하면 되는 준비된 소스"로 넘기는 것이 안전하다.
 
+## 앱 아이콘 전 플랫폼 완성 (2026-10-13, 저녁)
+
+- 위 "미해결 블로커" 해결: 타깃 Debug/Release에 `ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon` 추가.
+- visionOS 이미지 스택 실패 원인: `.imagestack`/`.imagestacklayer`는 tvOS 형식. visionOS는 `AppIcon.solidimagestack/{Front,Middle,Back}.solidimagestacklayer/Content.imageset`(`idiom: vision`, `scale: 2x`, 1024×1024 PNG, Back은 불투명)이 맞는 형식이라 이 구조로 `Media/AppIconLayers-VisionOS/` 3장을 연결했다. `AppIcon.appiconset`의 `platform: visionos` 항목은 제거.
+- `AppIcon.appiconset`에 iOS 다크(투명 배경)·틴티드(그레이스케일) 변형과 macOS 16–1024 전 크기를 추가. 기존 `AppIcon-1024.png`는 그대로 유지.
+
 ## 알려진 설계 메모
 
 - "비틀기"는 수학적으로는 전단(shear) 변형이다. UI 라벨은 사용자 친화적으로 "비틀기"를 쓰되, 수식 표기는 `shear(shx, shy)`로 정확히 기술한다 (PRD FR-2).

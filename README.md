@@ -79,9 +79,9 @@ https://github.com/user-attachments/assets/bf4c561f-6453-4a38-a67b-7d0c2437d687
 
 <img src="MathSketch/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png" width="120">
 
-앱 자신의 장미 곡선(rose curve) 도형 엔진으로 그린 아이콘 — 보라-자홍-주황 그라디언트 위에 흰 꽃잎 다섯 장. iOS/iPadOS와 visionOS 모두 하나의 1024×1024 원본을 쓰도록 자산 카탈로그를 구성했다 — Apple 공식 문서가 "visionOS는 단일 1024×1024 이미지로 충분하다"고 명시한 방법 그대로다.
+앱 자신의 장미 곡선(rose curve) 도형 엔진으로 그린 아이콘 — 보라-자홍-주황 그라디언트 위에 흰 꽃잎 다섯 장. 자산 카탈로그에는 iOS/iPadOS(기본·다크·틴티드), macOS(16–1024 전 크기), visionOS(3층 이미지 스택)용 아이콘이 모두 들어 있고, 타깃의 `ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon`으로 연결돼 있다.
 
-**visionOS 깊이감 레이어(배경·중간·전경)도 미리 만들어 뒀다.** Apple 문서에 따르면 더 입체적인 visionOS 아이콘은 레이어 3장을 에셋 카탈로그의 "이미지 스택"으로 쌓아 만드는데, 이 내부 포맷은 Apple이 JSON으로 공개하지 않고 Xcode에서 레이어를 추가한 뒤 Finder에서 이미지를 드래그하는 GUI 절차로만 안내되어 있다. 그래서 스키마를 추정해 직접 작성해보고 실제로 빌드해 actool 로그로 검증했지만 인식되지 않았다(근거 없는 파일을 "완성"이라 우기지 않기 위해) — 대신 완성된 레이어 3장을 바로 드래그해 넣을 수 있는 PNG로 `Media/AppIconLayers-VisionOS/`에 보관해 뒀다. visionOS 타깃이 생기면 이 3장을 에셋 카탈로그의 이미지 스택 레이어에 끌어다 놓기만 하면 된다.
+**visionOS는 깊이감 레이어 3장(배경·중간·전경)을 쌓은 `AppIcon.solidimagestack`으로 구성했다.** 예전에 시도했던 `.imagestack`/`.imagestacklayer`는 tvOS용 형식이라 actool이 인식하지 않았던 것이고, visionOS는 `.solidimagestack`/`.solidimagestacklayer`(각 레이어 안에 `Content.imageset`, `idiom: vision`)가 맞는 형식이다. 레이어 원본 PNG는 `Media/AppIconLayers-VisionOS/`에 그대로 보관한다. 현재 앱 타깃은 iPhone·iPad 전용이라 macOS·visionOS 아이콘은 해당 대상을 추가하는 순간 바로 쓰인다.
 
 <div align="center">
 <img src="Media/AppIconLayers-VisionOS/Back.png" width="18%"> <img src="Media/AppIconLayers-VisionOS/Middle.png" width="18%"> <img src="Media/AppIconLayers-VisionOS/Front.png" width="18%">
@@ -104,7 +104,7 @@ MathSketch/
     Gallery/               # SwiftData: SavedSketch
   Views/                 # CanvasView, PaletteView, InspectorView, FormulaBarView,
                           # PaletteSignatureView, SketchComposerView, GalleryView, SketchDetailView
-  Assets.xcassets/        # AppIcon(iOS+visionOS 겸용 단일 1024 아이콘), AccentColor
+  Assets.xcassets/        # AppIcon.appiconset(iOS 기본·다크·틴티드 + macOS 전 크기), AppIcon.solidimagestack(visionOS 3층), AccentColor
   MathSketchApp.swift
   ContentView.swift
 MathSketchTests/          # Swift Testing, 66개 테스트 (엔진 왕복 변환, 변형 수학, 팔레트 이름 결정성 등)
@@ -113,7 +113,7 @@ Docs/
   TASKS-MathSketch.md      # Phase 0~9 + 이후 UX 개선 라운드 태스크 로그·버그·설계 변경 메모
 Media/
   Screenshots/
-  AppIconLayers-VisionOS/  # Back/Middle/Front.png — visionOS 이미지 스택용 레이어 소스(GUI로 드래그해 넣을 준비물)
+  AppIconLayers-VisionOS/  # Back/Middle/Front.png — visionOS 이미지 스택(AppIcon.solidimagestack) 레이어 원본
   Video/                   # README 소개 영상 intro.gif(자동 재생) · intro.mp4 + 생성기 src/(앱 엔진 JS 포트, Playwright 렌더러)
 ```
 
@@ -133,11 +133,10 @@ Swift Testing 기반 66개 테스트 전체 통과: MathEngine(Lexer/Parser/Eval
 
 ## 알려진 제한사항
 
-- **앱 아이콘 활성화에 수동 작업 한 단계가 남아 있다**: 자산 카탈로그(`AppIcon.appiconset`)와 아이콘 이미지는 준비·커밋되어 있지만, 이 환경이 제공하는 빌드설정 도구가 `ASSETCATALOG_COMPILER_APPICON_NAME`(App Icon Source) 키를 인식하지 못해 자동으로 연결하지 못했다 — Xcode를 열어 **타깃 → General → App Icons and Launch Screen → App Icon Source에서 "AppIcon"을 선택**하면 바로 적용된다(또는 빌드설정에 `ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon` 한 줄 추가). pbxproj를 직접 편집하는 방식은 Xcode가 열려 있는 동안 프로젝트 파일 손상 위험이 있어 의도적으로 시도하지 않았다.
 - iPhone 16 시뮬레이터에서는 수동 QA로 전 기능(조립·제스처·실행취소/다시실행·전체지우기·합성 수식·역변환·팔레트 서명·저장·재실행 복원)을 검증했고, **실제 iPhone(유료 Apple Developer Program 미가입, 무료 개인 팀 서명)에서도 빌드·설치·실행·테스트 66개 전체 통과**를 확인했다. 초기에는 Xcode가 자동 부여한 `devplaceholder.*` placeholder 번들 ID 때문에 실기기 등록이 거부됐는데, 정상적인 역-DNS 번들 ID(`com.coulson.MathSketch`)로 바꿔 해결했다 — 유료 멤버십은 실기기 디버그 실행 자체에는 필요 없다.
 - **iPad 시뮬레이터 검증은 이 환경에서 iPad 시뮬레이터를 새로 생성하는 도구 호출이 반복적으로 타임아웃되어 보류되었다** — iPad 기기/시뮬레이터가 이미 있는 환경에서는 동일 빌드로 바로 검증 가능할 것으로 예상된다 (`TARGETED_DEVICE_FAMILY`에 iPad 포함, 레이아웃은 가변 스택이라 깨지지는 않지만 iPad 전용 멀티컬럼 레이아웃은 아직 없음).
 - 캔버스 조작은 드래그(이동) + 두 손가락 핀치/회전(균일 스케일/회전) + 인스펙터 슬라이더(비균일 스케일/비틀기/색)로 구현되어 있다 — PRD가 언급한 전용 모서리/회전/비틀기 "핸들" 오버레이 대신 이 조합을 택했다(Docs/TASKS-MathSketch.md 설계 메모 참고).
-- visionOS 전용 타깃은 아직 없다 — 아이콘(단일 이미지 버전 적용 완료 + 깊이감 레이어 3장 소스 준비완료)만 "준비완료" 상태이고, 실제 포팅(2D 창 vs 볼륨/공간 레이아웃 재설계, 이미지 스택에 레이어 3장 드래그)은 후속 작업이다.
+- visionOS 전용 타깃은 아직 없다 — 아이콘(3층 이미지 스택)은 자산 카탈로그에 들어 있어 visionOS 대상을 추가하면 바로 쓰이고, 실제 포팅(2D 창 vs 볼륨/공간 레이아웃 재설계)은 후속 작업이다.
 
 ## 참고 프로젝트
 
