@@ -21,9 +21,19 @@ struct SketchDetailView: View {
                             .background(Color.white)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
+                    if let artwork = sketch.pixelFormula {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("픽셀 수식 (\(artwork.sizeCaption) · 정의 \(artwork.definitionCount)개)")
+                                .font(.caption).foregroundStyle(.secondary)
+                            Text(artwork.source)
+                                .font(.system(.caption2, design: .monospaced))
+                                .fixedSize(horizontal: false, vertical: true)
+                                .textSelection(.enabled)
+                        }
+                    }
                     VStack(alignment: .leading, spacing: 4) {
                         Text("합성 수식 (\(sketch.elementCount)개 요소)").font(.caption).foregroundStyle(.secondary)
-                        Text(sketch.formulaText)
+                        Text(sketch.formulaText.isEmpty ? "도형 요소 없음" : sketch.formulaText)
                             .font(.system(.footnote, design: .monospaced))
                             .textSelection(.enabled)
                     }
@@ -54,7 +64,7 @@ struct SketchDetailView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("캔버스로 열기") {
-                        model.replaceAll(with: sketch.elements)
+                        model.restore(elements: sketch.elements, pixelFormula: sketch.pixelFormula)
                         dismiss()
                     }
                 }

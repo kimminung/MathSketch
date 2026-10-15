@@ -1,6 +1,6 @@
 # PRD — MathSketch
 
-버전: v0.3
+버전: v0.4 (FR-10 픽셀 수식 모드 추가, 2026-10-16)
 작성일: 2026-10-13
 참고 프로젝트: `Formula Simplification`(Mathigram) — MathEngine, Canvas 렌더링, SwiftData 영속성 패턴을 응용
 
@@ -112,6 +112,15 @@
 - 요소 리스트, 선택 인덱스, 인스펙터(스케일/회전/비틀기/색상 슬라이더 및 피커)는 `@Bindable` + `Binding`으로 뷰에 연결한다 (참고 프로젝트 `SettingsView`/`DrawView` 패턴).
 - Combine은 FR-7의 자동저장 디바운스, "합성 수식 패널" 텍스트 재계산 디바운스(150ms, 요소 변경 시), 그리고 "팔레트 서명" 재계산 디바운스(150ms, 색상 변경 시)에 한정해서 사용한다 — 무분별한 `ObservableObject`/`@Published`로의 회귀는 금지.
 
+### FR-10. 픽셀 수식 모드 (Pixel Formula) — "한 픽셀씩 계산되는 그림" (v0.4 추가)
+수학 예술 작품에서 흔히 쓰이는, **픽셀 (m, n)의 색을 직접 정의하는 수식**(예: `rgb(F(H_0(…)), F(H_1(…)), F(H_2(…)))` + `F(x)=…`, `H_v(x,y)=…` 같은 정의 목록)을 붙여넣으면 캔버스 배경으로 렌더링한다. 도형 요소(FR-1~FR-6)는 그 위에 그대로 겹쳐 그려진다.
+- **입력 형식**: LaTeX 부분집합. 문서 서두의 영어 설명("For m = 1, …, 2000 and n = 1, …, 1200 …")과 `where`/`and` 같은 연결어는 무시하고, `rgb(`부터 최상위 쉼표 단위로 문장을 나눈다. 지원 문법: 숫자, 한 글자 변수(병치는 곱셈: `us^2 = u·s²`), `+ - * / ^`, `\frac{}{}`, `\sqrt{}`, `|…|`/`\left|…\right|`(절댓값), `\lfloor…\rfloor`(바닥), `\sum_{s=a}^{b}`(정수 범위 포함, 본문은 다음 `+`/`-`까지 한 항), `e^{…}`(지수함수), `\pi`, `\sin \cos \tan \arctan \ln \exp` 등 내장 함수(`\sin^6(…)` 거듭제곱 표기 포함), 사용자 정의 함수 `F(x)`, 아래첨자 매개변수 `H_v(x,y)`, `L_{u,s}(x,y)`. `\mathrm{rgb}`, `\Big(`, `\left(`, `\tfrac`, `\,`, `×`, `−` 같은 조판 기호는 전처리기가 정규화한다. 크기는 서두의 "2000 × 1200" 같은 표기에서 읽고, 없으면 2000×1200.
+- **검증**: 정의되지 않은 함수·변수, 인자/아래첨자 개수 불일치, 채널 3개 미만, `rgb` 누락은 열 번호(가능한 경우)와 함께 한국어 오류로 보고한다. 채널 식은 픽셀 좌표 `m, n`과 상수(`e`, `π`)만 참조할 수 있고, 각 정의는 자기 매개변수만 참조할 수 있다.
+- **렌더링**: 수식 AST를 Metal Shading Language로 변환해(사용자 함수 → `float` 함수, `\sum` → 루프 헬퍼, 정수 거듭제곱 → 반복 곱, `e^x` → `exp`) 런타임에 컴파일하고(`mathMode = .safe` — `e^{-e^{-1000x}}` 류의 overflow→∞→0 체인이 정확히 유지돼야 함), 64행 밴드 단위로 디스패치해 GPU 워치독을 피한다. 먼저 1/4 해상도 미리보기를 띄운 뒤 전체 해상도로 교체한다(2000×1200, 50항 이중 합 수식이 iPhone/Mac GPU에서 1초 이내). NaN/∞ 픽셀은 0으로, 채널 값은 0…255로 클램프. Metal이 없는 환경에서는 CPU 트리 워킹 평가기로 아주 작은 해상도만 렌더링한다(정확성 기준 구현이자 테스트의 기준값).
+- **표시**: 수식 패널 상단에 "픽셀 수식 · 2000 × 1200 · 정의 11개" 상태 줄(컴파일 중/미리보기/완료 시간/오류)과 **LaTeX 원문 전체**(생략 없음)를 접이식으로 보여준다. "픽셀 수식 지우기" 버튼과 전체 지우기, 실행 취소/다시 실행이 모두 배경에도 적용된다(스냅샷은 `{요소, 픽셀 수식}` 쌍).
+- **영속성**: 저장되는 것은 **원문 문자열**(+크기, 정의 개수)뿐이며 이미지는 항상 재렌더링한다. 드래프트(Core Data `pixelFormulaJSON`, 옵셔널 속성 추가 → 경량 마이그레이션)와 갤러리(SwiftData `pixelFormulaJSON`)에 모두 보관하고, 썸네일에는 배경이 합성된다. "캔버스로 열기"는 배경까지 복원한다.
+- **비목표**: `\int`, 행렬, 조건식(`\begin{cases}`), 복소수, 다문자 식별자(`\mathrm{x}`)는 지원하지 않는다. 색상은 여전히 SketchFormula DSL(FR-5)에 포함되지 않는다 — 픽셀 수식은 DSL과 별개의 "배경 레이어"다.
+
 ## 5. 비기능 요구사항
 
 - **성능**: 요소 추가/변형 시 메인 스레드는 포인트 변형(곱셈 수준의 가벼운 연산)만 담당하고, SketchFormula 전체 재파싱/재직렬화처럼 무거운 작업은 `Task.detached(priority: .userInitiated)`로 분리한다 (참고 프로젝트 `DrawModel.render` 패턴).
@@ -125,6 +134,8 @@
 ```
 MathSketch/
   MathEngine/           # 참고 프로젝트에서 이식: Lexer, AST, Parser, Evaluator, FormulaFormatter
+    PixelFormula/        # FR-10: LaTeXTokenizer(전처리기 포함), PixelFormulaAST, PixelFormulaParser,
+                         #        PixelFormulaEvaluator(CPU 기준), MetalShaderTranspiler, PixelFormulaRenderer, Samples
   SketchEngine/          # 신규: ShapeKind 카탈로그(점·선·면 포함), SketchElement, ElementTransform, ElementColor,
                          #       SketchFormulaParser/Formatter(색 제외, DSL 확장), SketchCanvasRenderer(point/stroke/fill)
   PaletteSignature/      # 신규: PaletteNamer(색→감성 이름 최근접 매칭), PaletteSignature(스와치 목록+캡션 생성)

@@ -59,7 +59,7 @@ struct SketchComposerView: View {
                     } label: {
                         Label("저장", systemImage: "square.and.arrow.down")
                     }
-                    .disabled(model.elements.isEmpty)
+                    .disabled(model.isCanvasEmpty)
                     .accessibilityLabel(Text("갤러리에 저장"))
 
                     Button(role: .destructive) {
@@ -75,7 +75,7 @@ struct SketchComposerView: View {
                     } label: {
                         Image(systemName: "trash.fill")
                     }
-                    .disabled(model.elements.isEmpty)
+                    .disabled(model.isCanvasEmpty)
                     .accessibilityLabel(Text("모두 지우기"))
                 }
             }
@@ -88,21 +88,26 @@ struct SketchComposerView: View {
                 Button("취소", role: .cancel) {}
                 Button("지우기", role: .destructive) { model.clearAll() }
             } message: {
-                Text("캔버스의 모든 요소를 삭제합니다. 실행 취소로 되돌릴 수 있습니다.")
+                Text("캔버스의 모든 요소와 픽셀 수식 배경을 삭제합니다. 실행 취소로 되돌릴 수 있습니다.")
             }
         }
     }
 
     private func saveToGallery() {
-        guard let sketch = SavedSketch.make(title: saveTitle, elements: model.elements, thumbnailData: renderThumbnail()) else { return }
+        guard let sketch = SavedSketch.make(title: saveTitle, elements: model.elements,
+                                            pixelFormula: model.pixelFormula, thumbnailData: renderThumbnail()) else { return }
         modelContext.insert(sketch)
     }
 
     private func renderThumbnail() -> Data? {
         let rect = CGRect(x: 0, y: 0, width: 300, height: 300)
         let fitted = SketchCanvasRenderer.fit(elements: model.elements, in: rect)
+        let backdrop = model.pixelFormulaImage
         let renderer = ImageRenderer(content:
             Canvas { context, _ in
+                if let backdrop {
+                    SketchDrawing.drawBackdrop(backdrop, in: rect, into: &context)
+                }
                 for item in fitted {
                     SketchDrawing.draw(item, into: &context)
                 }
