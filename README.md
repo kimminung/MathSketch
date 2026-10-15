@@ -55,6 +55,7 @@ https://github.com/user-attachments/assets/bf4c561f-6453-4a38-a67b-7d0c2437d687
 - **실행 취소 / 다시 실행 / 전체 지우기** — 제스처 단위(탭 1회가 아니라 드래그·핀치·회전·슬라이더 조작 1회)로 스냅샷을 쌓는 실행 취소 스택. 선택 요소 하나만 지우거나, 확인 알림을 거쳐 캔버스를 통째로 비울 수도 있다 — 모두 실행 취소로 되돌릴 수 있다.
 - **팔레트 서명** — 색상은 수식에 포함되지 않는 장식 전용 속성. 대신 사용된 색을 모아 Lab 색공간 최근접 매칭으로 "노을빛 주황" 같은 한글 감성 이름을 붙이고, 갤러리 저장 시 제목으로 제안한다.
 - **이중 영속성** — 작업 중 캔버스는 Core Data(고빈도 자동저장, Combine 디바운스)로 색까지 포함해 항상 복원되고, 완성작은 SwiftData 갤러리에 명시적으로 저장해 썸네일·수식·팔레트 서명과 함께 다시 열 수 있다.
+- **픽셀 수식 모드 (GPU)** — 수학 예술 작품처럼 **픽셀 (m, n)의 색을 직접 정의하는 LaTeX 수식**(`\mathrm{rgb}\Big(F(H_0(\tfrac{m-1000}{500}, \tfrac{601-n}{500})), …\Big)` + `F(x)=\lfloor 255e^{-e^{-1000x}}…\rfloor`, `\sum_{s=1}^{50}`, `H_v`, `L_{u,s}` 같은 정의 목록)을 그대로 붙여넣으면, 자체 LaTeX 부분집합 파서가 해석하고 **Metal 셰이더로 변환해 런타임 컴파일** 후 2000×1200 픽셀을 GPU에서 계산해 캔버스 배경으로 깐다(1/4 미리보기 → 전체 해상도, 샘플 기준 0.3초대). 원문 전체가 수식 패널에 생략 없이 표시되고, 저장되는 것은 원문뿐이라 갤러리·드래프트에서 언제나 다시 렌더링된다. 입력 시트의 "예시 픽셀 수식 넣기"로 바로 체험할 수 있다.
 
 ## 스크린샷
 
@@ -68,6 +69,12 @@ https://github.com/user-attachments/assets/bf4c561f-6453-4a38-a67b-7d0c2437d687
 <img src="Media/Screenshots/phase10-full-formula-toolbar.png" width="32%">
 </div>
 <p align="center"><sub>실행취소·다시실행·선택삭제·전체삭제 툴바 + 정다각형·별다각형을 조합했을 때 생략 없이 끝까지 풀어쓴 합성 수식(바닥함수 포함 닫힌형 방정식)</sub></p>
+
+<div align="center">
+<img src="Media/Screenshots/phase11-pixel-formula.png" width="32%">
+<img src="Media/Screenshots/phase11-pixel-formula-sheet.png" width="32%">
+</div>
+<p align="center"><sub>픽셀 수식 모드 — 붙여넣은 LaTeX(rgb(F(H₀…)) + 정의 11개)를 Metal 셰이더로 변환해 GPU에서 2000×1200 픽셀을 계산한 배경과 상태 줄·LaTeX 원문 전체 / "수식으로 그리기" 시트의 예시 픽셀 수식</sub></p>
 
 <div align="center">
 <img src="Media/Screenshots/phase6-gallery-grid.png" width="32%">
@@ -94,6 +101,8 @@ https://github.com/user-attachments/assets/bf4c561f-6453-4a38-a67b-7d0c2437d687
 MathSketch/
   MathEngine/            # Formula Simplification에서 이식한 Lexer/AST/Evaluator/Parser +
                           # SketchFormulaParser/Formatter (DSL 확장, 색상 없음)
+    PixelFormula/         # LaTeX 부분집합 토크나이저·AST·파서, CPU 평가기, Metal 셰이더 변환기,
+                          # GPU 렌더러(밴드 디스패치, CPU 폴백), 번들 예시 수식
   SketchEngine/          # ShapeKind 카탈로그(23종), SketchElement, ElementTransform, ElementColor,
                           # SketchCanvasRenderer(point/stroke/fill), SketchDrawing,
                           # FormulaFormatter, ArtisticFormulaFormatter(생략 없는 표시용 수식)
@@ -107,10 +116,10 @@ MathSketch/
   Assets.xcassets/        # AppIcon.appiconset(iOS 기본·다크·틴티드 + macOS 전 크기), AppIcon.solidimagestack(visionOS 3층), AccentColor
   MathSketchApp.swift
   ContentView.swift
-MathSketchTests/          # Swift Testing, 66개 테스트 (엔진 왕복 변환, 변형 수학, 팔레트 이름 결정성 등)
+MathSketchTests/          # Swift Testing, 83개 테스트 (엔진 왕복 변환, 변형 수학, 팔레트 이름 결정성, LaTeX 파서·GPU/CPU 일치 등)
 Docs/
-  PRD-MathSketch.md        # 기술 PRD (FR-1~FR-9, FR-5a)
-  TASKS-MathSketch.md      # Phase 0~9 + 이후 UX 개선 라운드 태스크 로그·버그·설계 변경 메모
+  PRD-MathSketch.md        # 기술 PRD (FR-1~FR-10, FR-5a)
+  TASKS-MathSketch.md      # Phase 0~10 + 이후 UX 개선 라운드 태스크 로그·버그·설계 변경 메모
 Media/
   Screenshots/
   AppIconLayers-VisionOS/  # Back/Middle/Front.png — visionOS 이미지 스택(AppIcon.solidimagestack) 레이어 원본
@@ -129,13 +138,14 @@ Media/
 xcodebuild test -scheme MathSketch -destination 'platform=iOS Simulator,name=iPhone 16'
 ```
 
-Swift Testing 기반 66개 테스트 전체 통과: MathEngine(Lexer/Parser/Evaluator 연산자 우선순위·0 나눗셈 등) · SketchFormula 왕복 변환(23종 도형 전체 + 변형 + 다중 요소 + 색상 미직렬화 확인) · ElementTransform 수학(항등/회전/점 예외/클램핑) · ShapeKind 매개변수 검증 · PaletteNamer 결정성 · SavedSketch 직렬화. 실제 iPhone(무료 Apple ID 개인 팀 서명)에서도 빌드·설치·실행·테스트 66개 전체 통과를 확인했다.
+Swift Testing 기반 83개 테스트 전체 통과: MathEngine(Lexer/Parser/Evaluator 연산자 우선순위·0 나눗셈 등) · SketchFormula 왕복 변환(23종 도형 전체 + 변형 + 다중 요소 + 색상 미직렬화 확인) · ElementTransform 수학(항등/회전/점 예외/클램핑) · ShapeKind 매개변수 검증 · PaletteNamer 결정성 · SavedSketch 직렬화 · **픽셀 수식**(LaTeX 전처리·토크나이저·파서 의미론, F(0.5)=127 같은 손계산 값, Σ·병치 곱셈·절댓값 중첩, 예시 수식 전체 파싱, 오류 거부, MSL 소스 구조, 실제 Metal 컴파일 + GPU 렌더 결과를 CPU 평가기와 픽셀 단위 비교). 실제 iPhone(무료 Apple ID 개인 팀 서명)에서도 빌드·설치·실행·테스트 전체 통과를 확인했다(픽셀 수식 추가 전 66개 기준).
 
 ## 알려진 제한사항
 
 - iPhone 16 시뮬레이터에서는 수동 QA로 전 기능(조립·제스처·실행취소/다시실행·전체지우기·합성 수식·역변환·팔레트 서명·저장·재실행 복원)을 검증했고, **실제 iPhone(유료 Apple Developer Program 미가입, 무료 개인 팀 서명)에서도 빌드·설치·실행·테스트 66개 전체 통과**를 확인했다. 초기에는 Xcode가 자동 부여한 `devplaceholder.*` placeholder 번들 ID 때문에 실기기 등록이 거부됐는데, 정상적인 역-DNS 번들 ID(`com.coulson.MathSketch`)로 바꿔 해결했다 — 유료 멤버십은 실기기 디버그 실행 자체에는 필요 없다.
 - **iPad 시뮬레이터 검증은 이 환경에서 iPad 시뮬레이터를 새로 생성하는 도구 호출이 반복적으로 타임아웃되어 보류되었다** — iPad 기기/시뮬레이터가 이미 있는 환경에서는 동일 빌드로 바로 검증 가능할 것으로 예상된다 (`TARGETED_DEVICE_FAMILY`에 iPad 포함, 레이아웃은 가변 스택이라 깨지지는 않지만 iPad 전용 멀티컬럼 레이아웃은 아직 없음).
 - 캔버스 조작은 드래그(이동) + 두 손가락 핀치/회전(균일 스케일/회전) + 인스펙터 슬라이더(비균일 스케일/비틀기/색)로 구현되어 있다 — PRD가 언급한 전용 모서리/회전/비틀기 "핸들" 오버레이 대신 이 조합을 택했다(Docs/TASKS-MathSketch.md 설계 메모 참고).
+- 픽셀 수식 모드는 LaTeX **부분집합**만 지원한다(숫자·한 글자 변수·`\frac`·`\sqrt`·절댓값·바닥·`\sum`·`e^{}`·삼각/로그 함수·사용자 정의 함수와 아래첨자 매개변수). `\int`, 행렬, `\begin{cases}` 조건식, 다문자 식별자는 지원하지 않으며, GPU는 float32라 매우 큰 삼각함수 인자(예: `cos(32s²)`, s=50)에서 double 기준값과 몇 픽셀 차이가 날 수 있다. 렌더 결과는 붙여넣은 수식을 그대로 따르므로, 원작 이미지와의 시각적 일치는 수식 원문의 정확성에 달려 있다.
 - visionOS 전용 타깃은 아직 없다 — 아이콘(3층 이미지 스택)은 자산 카탈로그에 들어 있어 visionOS 대상을 추가하면 바로 쓰이고, 실제 포팅(2D 창 vs 볼륨/공간 레이아웃 재설계)은 후속 작업이다.
 
 ## 참고 프로젝트

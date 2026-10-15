@@ -26,6 +26,9 @@ struct CanvasView: View {
                 // blank until the first touch) — gestures below still use `canvasSize` since
                 // they can't run before the view is visible anyway.
                 let liveRect = CGRect(origin: .zero, size: size)
+                if let backdrop = model.pixelFormulaImage {
+                    SketchDrawing.drawBackdrop(backdrop, in: liveRect, into: &context)
+                }
                 let liveFitted = SketchCanvasRenderer.fit(elements: model.elements, in: liveRect)
                 for item in liveFitted {
                     SketchDrawing.draw(item, into: &context, selected: item.element.id == model.selectedElementID)
@@ -53,7 +56,9 @@ struct CanvasView: View {
         .background(Color.gray.opacity(0.08))
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text("스케치 캔버스, 요소 \(model.elements.count)개"))
+        .accessibilityLabel(Text(model.pixelFormula == nil
+                                 ? "스케치 캔버스, 요소 \(model.elements.count)개"
+                                 : "스케치 캔버스, 픽셀 수식 배경과 요소 \(model.elements.count)개"))
     }
 
     /// Picks the element whose actual rendered geometry is closest to the tap, not just the
