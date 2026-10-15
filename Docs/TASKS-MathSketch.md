@@ -138,6 +138,14 @@
 - 수동 QA(iPhone 16 시뮬레이터): 입력 시트 → 예시 넣기 → 렌더링 → 배경 표시·상태 줄("GPU 0.8초")·LaTeX 원문 전체(1326pt, 생략 없음)·지우기·실행 취소/다시 실행 복원·배경 위에 도형 드롭·갤러리 저장(썸네일에 배경 합성)·상세 화면 LaTeX 섹션·재실행 시 드래프트에서 배경 자동 복원 확인. 스크린샷 `Media/Screenshots/phase11-pixel-formula.png`, `phase11-pixel-formula-sheet.png`.
 - **QA에서 잡은 버그**: 첫 "렌더링" 탭에서 앱 크래시 — `MTLValidateFeatureSupport: 'Dispatch Threads with Non-Uniform Threadgroup Size is not supported on this device'`. `dispatchThreads(_:threadsPerThreadgroup:)`는 비균일 스레드그룹을 지원하는 GPU 패밀리에서만 쓸 수 있고, 시뮬레이터 Metal 디바이스(+디버그 스킴의 API 검증 레이어)는 어설션으로 중단한다(스로우가 아니라서 CPU 폴백도 타지 않음). 수정: 그리드를 스레드그룹 단위로 올림한 `dispatchThreadgroups(_:threadsPerThreadgroup:)`로 바꾸고, 유니폼에 `bandRows`를 넣어 커널이 넘치는 스레드를 스스로 버리게 했다. 교훈: `RunCodeSnippet`(Mac 호스트 GPU)에서 잘 돌아도 시뮬레이터/실기기 GPU 패밀리 제약은 별개다 — Metal 코드는 반드시 시뮬레이터에서 한 번 실행해 볼 것.
 
+## Phase 10 후속 — 예시 수식 전사 교정 (2026-10-16)
+
+사용자가 원작 그림(IMG_4609)을 제공해 렌더 결과와 대조. 상세 기록은 `Docs/PixelFormula-Sample-Corrections.md`, 이미지는 `Media/PixelFormula/`.
+
+- [x] 전사 오류 2건 교정: H_v 첫 마스크 원 중심 `+3/2` → `+1/2`, 두 마스크의 제곱근 계수 `5√` → `(2/5)√`. 교정 전/후 렌더(`sample-render-before.png` / `sample-render-after.png`)와 수식 사진 확대본 3장 보관. 회귀 테스트 `sampleUsesCorrectedMaskTerms` 추가.
+- [x] 원작과 일치 확인: 두 구멍 위치(x′ ≈ ±0.5), 제트(B 항의 x′ = ±1/2 선 + 위쪽 게이트), 색 비율(K₁/K₀ ≈ 0.74 vs 원작 0.73).
+- [ ] **미해결**: 배경에서 `20K_v/37` ≈ 9~15로 흰색 포화(원작은 0.4~0.7 수준의 보라빛 중간 톤). 단일 기호 가정 3종으로는 설명되지 않음 → K_v 줄 고해상도 이미지 필요. 마스크 항 `e^{-200(…)}`의 형태(제곱 여부)도 확인 필요.
+
 ## 알려진 설계 메모
 
 - "비틀기"는 수학적으로는 전단(shear) 변형이다. UI 라벨은 사용자 친화적으로 "비틀기"를 쓰되, 수식 표기는 `shear(shx, shy)`로 정확히 기술한다 (PRD FR-2).

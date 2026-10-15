@@ -20,10 +20,10 @@ nonisolated enum PixelFormulaSamples {
 
     H_v(x,y) = e^{-e^{-50\left(y-\frac{x}{3}-\frac{7}{50}\right)}} \frac{B(x,y)}{5}
      + \frac{20K_v(x,y)}{37}
-     \left( 1 - e^{-e^{200\left(\left(x+\frac{y}{3}+\frac{3}{2}\right)^2 + \left(y-\frac{x}{3}+\frac{3}{100}\right)^2 - \frac{3}{100}\right)}}
-     - e^{-200\left(y-\frac{x}{3}+5\sqrt{\left|\frac{3}{100}-\left(x+\frac{y}{3}+\frac{3}{2}\right)^2\right|}\right)} \right)
+     \left( 1 - e^{-e^{200\left(\left(x+\frac{y}{3}+\frac{1}{2}\right)^2 + \left(y-\frac{x}{3}+\frac{3}{100}\right)^2 - \frac{3}{100}\right)}}
+     - e^{-200\left(y-\frac{x}{3}+\frac{2}{5}\sqrt{\left|\frac{3}{100}-\left(x+\frac{y}{3}+\frac{1}{2}\right)^2\right|}\right)} \right)
      \left( 1 - e^{-e^{200\left(\left(x+\frac{y}{3}-\frac{1}{2}\right)^2 + \left(y-\frac{x}{3}+\frac{3}{100}\right)^2 - \frac{1}{50}\right)}}
-     - e^{-200\left(y-\frac{x}{3}+5\sqrt{\left|\frac{1}{50}-\left(x+\frac{y}{3}-\frac{1}{2}\right)^2\right|}\right)} \right),
+     - e^{-200\left(y-\frac{x}{3}+\frac{2}{5}\sqrt{\left|\frac{1}{50}-\left(x+\frac{y}{3}-\frac{1}{2}\right)^2\right|}\right)} \right),
 
     B(x,y) = \sum_{s=1}^{50} e^{\,-e^{-100\left(\sin^6(T_s(x,y)) - \frac{199}{200}\right)}
      - e^{-\frac{\cos^6(200T_s(x,y)+s^2)}{20}}

@@ -120,8 +120,10 @@ MathSketchTests/          # Swift Testing, 83개 테스트 (엔진 왕복 변환
 Docs/
   PRD-MathSketch.md        # 기술 PRD (FR-1~FR-10, FR-5a)
   TASKS-MathSketch.md      # Phase 0~10 + 이후 UX 개선 라운드 태스크 로그·버그·설계 변경 메모
+  PixelFormula-Sample-Corrections.md  # 예시 픽셀 수식 전사 교정 전/후 기록 (원작 대조, 미해결 항목)
 Media/
   Screenshots/
+  PixelFormula/            # 예시 수식 교정 전/후 렌더 + 수식 사진 확대본
   AppIconLayers-VisionOS/  # Back/Middle/Front.png — visionOS 이미지 스택(AppIcon.solidimagestack) 레이어 원본
   Video/                   # README 소개 영상 intro.gif(자동 재생) · intro.mp4 + 생성기 src/(앱 엔진 JS 포트, Playwright 렌더러)
 ```
@@ -145,7 +147,7 @@ Swift Testing 기반 83개 테스트 전체 통과: MathEngine(Lexer/Parser/Eval
 - iPhone 16 시뮬레이터에서는 수동 QA로 전 기능(조립·제스처·실행취소/다시실행·전체지우기·합성 수식·역변환·팔레트 서명·저장·재실행 복원)을 검증했고, **실제 iPhone(유료 Apple Developer Program 미가입, 무료 개인 팀 서명)에서도 빌드·설치·실행·테스트 66개 전체 통과**를 확인했다. 초기에는 Xcode가 자동 부여한 `devplaceholder.*` placeholder 번들 ID 때문에 실기기 등록이 거부됐는데, 정상적인 역-DNS 번들 ID(`com.coulson.MathSketch`)로 바꿔 해결했다 — 유료 멤버십은 실기기 디버그 실행 자체에는 필요 없다.
 - **iPad 시뮬레이터 검증은 이 환경에서 iPad 시뮬레이터를 새로 생성하는 도구 호출이 반복적으로 타임아웃되어 보류되었다** — iPad 기기/시뮬레이터가 이미 있는 환경에서는 동일 빌드로 바로 검증 가능할 것으로 예상된다 (`TARGETED_DEVICE_FAMILY`에 iPad 포함, 레이아웃은 가변 스택이라 깨지지는 않지만 iPad 전용 멀티컬럼 레이아웃은 아직 없음).
 - 캔버스 조작은 드래그(이동) + 두 손가락 핀치/회전(균일 스케일/회전) + 인스펙터 슬라이더(비균일 스케일/비틀기/색)로 구현되어 있다 — PRD가 언급한 전용 모서리/회전/비틀기 "핸들" 오버레이 대신 이 조합을 택했다(Docs/TASKS-MathSketch.md 설계 메모 참고).
-- 픽셀 수식 모드는 LaTeX **부분집합**만 지원한다(숫자·한 글자 변수·`\frac`·`\sqrt`·절댓값·바닥·`\sum`·`e^{}`·삼각/로그 함수·사용자 정의 함수와 아래첨자 매개변수). `\int`, 행렬, `\begin{cases}` 조건식, 다문자 식별자는 지원하지 않으며, GPU는 float32라 매우 큰 삼각함수 인자(예: `cos(32s²)`, s=50)에서 double 기준값과 몇 픽셀 차이가 날 수 있다. 렌더 결과는 붙여넣은 수식을 그대로 따르므로, 원작 이미지와의 시각적 일치는 수식 원문의 정확성에 달려 있다.
+- 픽셀 수식 모드는 LaTeX **부분집합**만 지원한다(숫자·한 글자 변수·`\frac`·`\sqrt`·절댓값·바닥·`\sum`·`e^{}`·삼각/로그 함수·사용자 정의 함수와 아래첨자 매개변수). `\int`, 행렬, `\begin{cases}` 조건식, 다문자 식별자는 지원하지 않으며, GPU는 float32라 매우 큰 삼각함수 인자(예: `cos(32s²)`, s=50)에서 double 기준값과 몇 픽셀 차이가 날 수 있다. 렌더 결과는 붙여넣은 수식을 그대로 따르므로, 원작 이미지와의 시각적 일치는 수식 원문의 정확성에 달려 있다. 번들 예시 수식은 원작 그림과 대조해 전사 오류 2건(원 중심 1/2, 제곱근 계수 2/5)을 교정했지만, 사진 해상도 한계로 K_v 항의 크기 차이가 아직 남아 배경이 원작처럼 어둡게 나오지 않는다 — 교정 전/후 비교와 근거는 [Docs/PixelFormula-Sample-Corrections.md](Docs/PixelFormula-Sample-Corrections.md) 참고.
 - visionOS 전용 타깃은 아직 없다 — 아이콘(3층 이미지 스택)은 자산 카탈로그에 들어 있어 visionOS 대상을 추가하면 바로 쓰이고, 실제 포팅(2D 창 vs 볼륨/공간 레이아웃 재설계)은 후속 작업이다.
 
 ## 참고 프로젝트

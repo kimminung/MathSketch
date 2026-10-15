@@ -58,6 +58,17 @@ struct PixelFormulaParserTests {
         #expect(program.functions["H"]?.subscriptParameters == ["v"])
     }
 
+    /// Pins the two transcription corrections made against the original artwork
+    /// (Docs/PixelFormula-Sample-Corrections.md): disc centres at x′ = ±1/2 and a 2/5
+    /// square-root coefficient in both H_v mask factors.
+    @Test func sampleUsesCorrectedMaskTerms() {
+        let sample = PixelFormulaSamples.sample
+        #expect(!sample.contains(#"x+\frac{y}{3}+\frac{3}{2}"#))
+        #expect(sample.components(separatedBy: #"\frac{2}{5}\sqrt{"#).count - 1 == 2)
+        #expect(!sample.contains(#"+5\sqrt{"#))
+        #expect(sample.contains(#"\left(x+\frac{y}{3}+\frac{1}{2}\right)^2 + \left(y-\frac{x}{3}+\frac{3}{100}\right)^2 - \frac{3}{100}"#))
+    }
+
     @Test func looksLikePixelFormulaDistinguishesDSL() {
         #expect(PixelFormulaParser.looksLikePixelFormula(PixelFormulaSamples.sample))
         #expect(!PixelFormulaParser.looksLikePixelFormula("circle(r: 1) · translate(1, 2)"))
